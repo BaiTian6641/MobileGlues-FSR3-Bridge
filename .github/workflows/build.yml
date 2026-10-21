@@ -25,7 +25,7 @@ jobs:
       - id: matrix
         shell: bash
         run: |
-          echo "profiles=$(python3 -c 'import json; print(json.dumps([p[\"id\"] for p in json.load(open(\"compatibility-lock.json\"))[\"profiles\"]]))')" >> "$GITHUB_OUTPUT"
+          echo "profiles=$(python3 -c 'import json; print(json.dumps([p["id"] for p in json.load(open("compatibility-lock.json"))["profiles"]]))')" >> "$GITHUB_OUTPUT"
   jars:
     name: ${{ matrix.profile }}
     needs: prepare
