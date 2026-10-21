@@ -96,8 +96,19 @@ public final class DiagnosticTrace {
     }
 
     public static synchronized void phase(String phase) {
-        if (!enabled) tryArm();
-        if (!active()) return;
+        try {
+            phaseBoundary(phase);
+        } catch (Exception | LinkageError failure) {
+            diagnosticFailure(failure);
+        }
+    }
+
+    private static void phaseBoundary(String phase) {
+        // beginFrame owns marker polling and the frame budget. A phase callback
+        // outside a world frame must not arm a frame-zero capture.
+        if (!active() || frame == 0) return;
+        hooks.add("Pipeline.setPhase");
+        if (("PHASE_" + phase).equals(currentRole)) return;
         // Hand, shadow, composite and final hooks own their role across the
         // phase calls that occur inside those passes. Do not truncate them.
         if (currentRole != null && (currentRole.startsWith("HAND_") ||
@@ -121,6 +132,7 @@ public final class DiagnosticTrace {
     }
 
     private static boolean shouldCapturePhase(String phase) {
+        if (phase.startsWith("TERRAIN_")) return true;
         if (frame <= 2) return true;
         if ((frame % 30) == 0) return true;
         return phase.startsWith("SKY") || phase.startsWith("STARS") || "CUSTOM_SKY".equals(phase);
@@ -167,6 +179,33 @@ public final class DiagnosticTrace {
     public static synchronized void plain(String name, String extraJson) {
         if (!active()) return;
         appendEvent(name, currentRole, extraJson, NativeBridge.trace(OP_SNAPSHOT, 0, frame, eventCounter + 1));
+    }
+
+
+    /** Report Java/JNI outcome only; this event performs no additional GL query. */
+    public static synchronized void submitResult(boolean attempted, Integer result,
+                                                  MainSubmissionTarget target, String stage,
+                                                  Throwable failure, boolean depthNegotiated) {
+        if (!active()) return;
+        try {
+            StringBuilder extra = new StringBuilder(256);
+            extra.append('{');
+            boolean first = rawField(extra, true, "attempted", String.valueOf(attempted));
+            first = integerField(extra, first, "native_rc", result);
+            first = field(extra, first, "stage", stage);
+            first = field(extra, first, "exception_class", failure == null ? null : failure.getClass().getName());
+            boolean verified = target != null && target.colorTexture() > 0;
+            first = rawField(extra, first, "main_target_verified", String.valueOf(verified));
+            first = integerField(extra, first, "main_color_texture", verified ? target.colorTexture() : null);
+            first = integerField(extra, first, "main_width", verified ? target.width() : null);
+            first = integerField(extra, first, "main_height", verified ? target.height() : null);
+            first = rawField(extra, first, "sampled_depth_reversed", String.valueOf(AdapterProfile.depthConvention() == 1));
+            rawField(extra, first, "depth_convention_negotiated", String.valueOf(depthNegotiated));
+            extra.append('}');
+            appendEvent("SUBMIT_RESULT", null, extra.toString(), null);
+        } catch (Exception | LinkageError diagnosticError) {
+            diagnosticFailure(diagnosticError);
+        }
     }
 
     public static synchronized void hook(String name) {

@@ -21,7 +21,7 @@ from classfile import methods
 from package_metadata import forge_pack_metadata, verify_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.2.2'
+VERSION = '0.2.3'
 NDK_VERSION = '28.2.13676358'
 
 
@@ -69,7 +69,7 @@ def verify_hooks(profile, artifact):
     """Check actual class structure, descriptors, and all allocation call references."""
     required = {
         'FinalPassRenderer': ['renderFinalPass'],
-        'Pipeline': ['<init>', 'destroy', 'beginLevelRendering'],
+        'Pipeline': ['<init>', 'destroy', 'beginLevelRendering', 'setPhase'],
         'ViewportUniforms': ['lambda$addViewportUniforms$0', 'lambda$addViewportUniforms$1'],
         'RenderTargets': ['<init>', 'resizeIfNeeded', 'copyPreHandDepth', 'copyPreTranslucentDepth'],
         'ProgramSet': ['get'], 'DepthTexture': ['<init>', 'getTextureId'],
@@ -92,6 +92,19 @@ def verify_hooks(profile, artifact):
                 if (name, desc) not in actual:
                     raise ValueError('missing exact hook: ' + class_name + '.' + name + desc)
                 evidence.append(class_name + '.' + name + desc)
+        pipeline = profile['classes']['Pipeline'].replace('.', '/')
+        _, pipeline_methods, _ = methods(jar.read(pipeline + '.class'))
+        phase_code = next(attrs['Code'] for name, desc, _, attrs in pipeline_methods
+                          if name == 'setPhase' and desc == descriptor(profile, 'Pipeline', name))
+        contract = profile['diagnostic_contract']
+        if sha(phase_code) != contract['set_phase_code_sha256']:
+            raise ValueError('diagnostic phase setter bytecode drift')
+        phase_owner = profile['classes']['WorldRenderingPhase'].replace('.', '/')
+        _, _, _, phase_fields = methods(jar.read(phase_owner + '.class'), include_fields=True)
+        constants = [name for name, desc, access, _ in phase_fields if access & 0x4000]
+        if constants != contract['phase_constants']:
+            raise ValueError('diagnostic phase enum drift')
+        evidence.append(pipeline + '.setPhase:verified-bytecode-and-phase-enum')
         for owner, names in profile['viewport_expression_methods'].items():
             class_name = profile['classes'][owner].replace('.', '/')
             _, entries, _ = methods(jar.read(class_name + '.class'))
@@ -144,6 +157,8 @@ def generate_sources(profile, folder):
     replacements = {
         'FINAL_CLASS': profile['classes']['FinalPassRenderer'],
         'PIPELINE_CLASS': profile['classes']['Pipeline'],
+        'PHASE_CLASS': profile['classes']['WorldRenderingPhase'],
+        'PHASE_DESCRIPTOR': descriptor(profile, 'Pipeline', 'setPhase'),
         'VIEWPORT_CLASS': profile['classes']['ViewportUniforms'],
         'PROGRAM_IMPORT': '',
         'TARGETS_CLASS': profile['classes']['RenderTargets'],
@@ -316,7 +331,7 @@ def build(profile, dependencies):
         # Use actual class bytes without Oculus's stale manifest Class-Path. Only
         # compile-time API dependencies are copied; none enter the adapter JAR.
         compile_api = folder / 'shader-api.jar'
-        owners = ['ProgramSet', 'CustomUniforms', 'CustomUniformInputs', 'CachedUniform', 'GlFramebuffer', 'GlResource']
+        owners = ['ProgramSet', 'CustomUniforms', 'CustomUniformInputs', 'CachedUniform', 'GlFramebuffer', 'GlResource', 'WorldRenderingPhase']
         members = {profile['classes'][owner].replace('.', '/') + '.class' for owner in owners}
         with zipfile.ZipFile(artifact) as source, zipfile.ZipFile(compile_api, 'w') as view:
             members.update(name for name in source.namelist() if name.startswith('kroppeb/stareval/') and name.endswith('.class'))

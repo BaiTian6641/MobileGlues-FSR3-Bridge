@@ -1,0 +1,23 @@
+package com.googlebook.fsrbridge;
+
+import com.googlebook.fsrbridge.mixin.PipelineMixin;
+import @PHASE_CLASS@;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/** Invokes the actual generated handler with the pinned enum; no live Mixin transform is claimed. */
+public final class DiagnosticPipelineHook extends PipelineMixin {
+    private DiagnosticPipelineHook() { }
+
+    public static void call(String name) throws ReflectiveOperationException {
+        var handler = PipelineMixin.class.getDeclaredMethod("mgfsr3$phase", WorldRenderingPhase.class, CallbackInfo.class);
+        handler.setAccessible(true);
+        var info = new CallbackInfo("setPhase", false);
+        WorldRenderingPhase selected = null;
+        for (WorldRenderingPhase phase : WorldRenderingPhase.values()) {
+            if (phase.name().equals(name)) selected = phase;
+        }
+        if (selected == null) throw new AssertionError("unknown pinned phase " + name);
+        handler.invoke(new DiagnosticPipelineHook(), selected, info);
+        if (info.isCancelled()) throw new AssertionError("diagnostic callback cancelled a render phase");
+    }
+}

@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @PROGRAM_IMPORT@
+import @PHASE_CLASS@;
 
 /** Keeps scene color and depth dimensions together at Iris' allocation and resize calls. */
 @Mixin(targets = "@PIPELINE_CLASS@", remap = false)
@@ -24,6 +25,12 @@ public abstract class PipelineMixin {
         Fsr3Bridge.destroySceneDepth();
         Fsr3Bridge.resetFinalPassScope();
         DiagnosticTrace.finish();
+    }
+
+    @Inject(method = "setPhase@PHASE_DESCRIPTOR@", at = @At("RETURN"), require = 1)
+    private void mgfsr3$phase(WorldRenderingPhase phase, CallbackInfo callback) {
+        if (!DiagnosticTrace.active()) return;
+        DiagnosticTrace.phase(phase == null ? "UNKNOWN" : phase.name());
     }
 
     @Inject(method = "beginLevelRendering()V", at = @At("HEAD"), require = 1)

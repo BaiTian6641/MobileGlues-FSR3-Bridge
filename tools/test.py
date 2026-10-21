@@ -17,6 +17,7 @@ from build import ROOT, VERSION, verify_hooks
 from package_metadata import MIXIN_CONFIG, verify_package_metadata
 from test_viewport_uniforms import check_viewport_uniforms
 from test_scene_depth import check_scene_depth
+from test_diagnostics import check_diagnostics
 
 
 def run(*args):
@@ -192,6 +193,10 @@ def main():
         folder / 'helper.so', folder / 'incomplete.so', folder / 'complete.so')
     run(java, '--enable-native-access=ALL-UNNAMED', '-cp', os.pathsep.join(map(str, [folder, baseline])),
         'com.googlebook.fsrbridge.DepthConventionContractTest', folder / 'helper.so', folder / 'depth-aware.so')
+    run(*common, '-DDEPTH_CONVENTION', ROOT / 'tests/diagnostic_fixture.cpp', '-o', folder / 'diagnostic.so')
+    for profile in profiles:
+        artifact = ROOT / 'dist' / ('mgfsr3bridge-' + VERSION + '-' + profile['id'] + '.jar')
+        check_diagnostics(profile, javac, java, folder, artifact)
     for source in (ROOT / 'tools').glob('*.py'):
         ast.parse(source.read_text(), filename=str(source))
     print('PASS Python AST and package isolation checks; game/device tests NOT RUN')

@@ -41,7 +41,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -57,6 +58,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -240,6 +244,35 @@
           "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
           "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
         }
+      },
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "d4d20bb68594a1900f6f774493fa5d874abcdb2a941de442dd731a9b4292fefa",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
       }
     },
     {
@@ -282,7 +315,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -298,6 +332,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -481,6 +518,35 @@
           "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
           "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
         }
+      },
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "d4d20bb68594a1900f6f774493fa5d874abcdb2a941de442dd731a9b4292fefa",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
       }
     },
     {
@@ -523,7 +589,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -539,6 +606,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -674,7 +744,36 @@
           "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "3e21baf0c0ffcf473758530fe9400c1f690a89ae5d49ab48f703d9a907bd8f81",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     },
     {
       "id": "1.21.1-neoforge",
@@ -709,7 +808,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -725,6 +825,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -860,7 +963,36 @@
           "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "4092db660970d02d4cf1487f7a701b47a603ed17317c96eac411baa92e0bd685",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     },
     {
       "id": "1.20.1-fabric",
@@ -902,7 +1034,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -918,6 +1051,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -1053,7 +1189,36 @@
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "64f753867292940d79555ef1f2bc154c1f581bd88973cc92625602cf296c200f",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     },
     {
       "id": "1.20.1-forge",
@@ -1095,7 +1260,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.irisshaders.iris.gl.GlResource"
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -1111,6 +1277,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -1246,7 +1415,36 @@
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "b4bd6e282b04afba2e792a7d96ec2ea0fbc291dcbd284109e07bbe84240343ff",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     },
     {
       "id": "1.18.2-fabric",
@@ -1288,7 +1486,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.coderbot.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.coderbot.iris.gl.GlResource"
+        "GlResource": "net.coderbot.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.coderbot.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.coderbot.iris",
       "scene_scaling": true,
@@ -1304,6 +1503,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/coderbot/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -1439,7 +1641,36 @@
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "4db08fd3061318bd5652b44b4ee6ee8f3e7ca8c8476846a1fff51f09a974c8bb",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     },
     {
       "id": "1.18.2-forge",
@@ -1481,7 +1712,8 @@
         "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
         "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
         "GlFramebuffer": "net.coderbot.iris.gl.framebuffer.GlFramebuffer",
-        "GlResource": "net.coderbot.iris.gl.GlResource"
+        "GlResource": "net.coderbot.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.coderbot.iris.pipeline.WorldRenderingPhase"
       },
       "namespace": "net.coderbot.iris",
       "scene_scaling": true,
@@ -1497,6 +1729,9 @@
           ],
           "beginLevelRendering": [
             "()V"
+          ],
+          "setPhase": [
+            "(Lnet/coderbot/iris/pipeline/WorldRenderingPhase;)V"
           ]
         },
         "FinalPassRenderer": {
@@ -1632,7 +1867,36 @@
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
       },
-      "depth_convention": 0
+      "depth_convention": 0,
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "3ad91888ea6ab0ba8b7bdf105af73cdbe5e7f7979372d20bddf1a7d492b203db",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      }
     }
   ]
 }

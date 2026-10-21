@@ -466,13 +466,25 @@ public final class Fsr3Bridge {
     }
 
     public static void submit(Object finalColorFramebuffer) {
-        if (!LOADED) return;
+        if (!LOADED) {
+            DiagnosticTrace.submitResult(false, null, null, "unavailable", null, false);
+            return;
+        }
+        Integer rc = null;
+        MainSubmissionTarget target = null;
+        boolean attempted = false;
+        String stage = "target_bind";
+        Throwable failure = null;
         try {
-            int rc;
-            MainSubmissionTarget target = AdapterProfile.bindSubmissionTarget(finalColorFramebuffer);
-            try (target) {
+            target = AdapterProfile.bindSubmissionTarget(finalColorFramebuffer);
+            MainSubmissionTarget scope = target;
+            try (scope) {
+                stage = "native_submit";
+                attempted = true;
                 rc = NativeBridge.submit();
+                stage = "target_restore";
             }
+            stage = "complete";
             if (rc == 0) {
                 previousSubmitFailure = null;
                 if (!submitLogged) {
@@ -483,7 +495,10 @@ public final class Fsr3Bridge {
                 reportSubmitFailure("submit rc=" + rc);
             }
         } catch (Exception | LinkageError t) {
+            failure = t;
             reportSubmitFailure("nativeSubmit failed: " + t);
+        } finally {
+            DiagnosticTrace.submitResult(attempted, rc, target, stage, failure, true);
         }
     }
 }
