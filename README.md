@@ -65,6 +65,15 @@ records returned JNI status separately from target setup and cleanup failures.
 See [diagnostic capture](docs/diagnostic-capture.md) for fields, capture limits and
 host-test boundaries. This diagnostic change does not establish a terrain fix.
 
+Version 0.2.4 corrects depth ownership during quality changes in the six older
+adapters. It refreshes Iris/Oculus attachments when the selected depth changes,
+retains replaced textures until adoption completes, and stops submitting scaled
+depth after a switch to Native AA. All six pass 86 focused host checks each;
+the preserved 0.2.3 JARs fail both targeted regression witnesses per profile.
+See [legacy depth lifetime](docs/legacy-depth-lifecycle.md) for exact contracts
+and evidence limits. These builds still require physical game qualification;
+this correction does not establish a fix for the separate 26.2 terrain failure.
+
 ## Build
 
 Install Python 3.12+, JDK 25, and Android NDK **28.2.13676358 (r28c)**. JDK 25 is
@@ -80,7 +89,7 @@ python3 tools/test.py --profile all
 
 To build one lane, for example, use `sh build.sh --profile 1.21.1-neoforge`.
 `JAVAC=/path/to/jdk25/bin/javac` selects a compiler explicitly. Build outputs are
-`dist/mgfsr3bridge-0.2.3-<minecraft>-<loader>.jar`, with per-profile JSON reports.
+`dist/mgfsr3bridge-0.2.4-<minecraft>-<loader>.jar`, with per-profile JSON reports.
 Every JAR includes Android `arm64-v8a` and `x86_64` helpers with 16 KB-aligned ELF
 segments. x86_64 is an ABI build lane and does not establish target-device support.
 

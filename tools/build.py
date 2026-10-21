@@ -21,7 +21,7 @@ from classfile import methods
 from package_metadata import forge_pack_metadata, verify_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.2.3'
+VERSION = '0.2.4'
 NDK_VERSION = '28.2.13676358'
 
 
