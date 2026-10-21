@@ -18,9 +18,10 @@ import urllib.request
 import zipfile
 
 from classfile import methods
+from package_metadata import forge_pack_metadata, verify_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.2.0'
+VERSION = '0.2.1'
 NDK_VERSION = '28.2.13676358'
 
 
@@ -149,6 +150,9 @@ def generate_sources(profile, folder):
 
 
 def resources(profile, classes):
+    pack = forge_pack_metadata(profile)
+    if pack is not None:
+        (classes / 'pack.mcmeta').write_text(json.dumps(pack, indent=2) + '\n')
     mixins = {'required': True, 'minVersion': '0.8', 'package': 'com.googlebook.fsrbridge.mixin',
               'compatibilityLevel': 'JAVA_17', 'client': ['FinalPassMixin', 'PipelineMixin', 'ViewportMixin',
                   'HandRendererTraceMixin', 'ShadowRendererTraceMixin', 'CompositeRendererTraceMixin', 'RenderTargetsTraceMixin'],
@@ -254,8 +258,10 @@ def build(profile, dependencies):
     source_hash = sha(b''.join(path.relative_to(ROOT).as_posix().encode() + b'\0' + path.read_bytes() for path in source_files))
     (classes / 'trace-build.properties').write_text('schema_version=2\nsource_tree_sha256=' + source_hash + '\niris_jar_sha256=' + profile['sha256'] + '\nadapter=' + profile['id'] + '\n')
     jar = package(profile, classes)
+    package_metadata = verify_artifact(profile, jar, VERSION)
     report = {'profile': profile['id'], 'artifact': jar.name, 'sha256': sha(jar.read_bytes()), 'source_tree_sha256': source_hash,
               'native_sha256': native_hashes, 'verified_hooks': evidence, 'javac_lint': 'pass',
+              'package_metadata': package_metadata,
               'scene_scaling_adapter': profile['scene_scaling'], 'loader_launch': 'not_run', 'device_qualification': 'not_run'}
     (ROOT / 'dist' / (profile['id'] + '-build.json')).write_text(json.dumps(report, indent=2) + '\n')
     print(report['sha256'], jar.name, flush=True)
