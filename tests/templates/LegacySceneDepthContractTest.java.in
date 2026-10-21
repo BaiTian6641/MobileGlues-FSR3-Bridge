@@ -1,0 +1,262 @@
+package com.googlebook.fsrbridge;
+
+import com.googlebook.fsrbridge.mixin.PipelineMixin;
+import @RENDER_TARGETS@;
+import @DEPTH_TEXTURE@;
+import @GL_FRAMEBUFFER@;
+import @PROGRAM_SET@;
+import @PROGRAM_ID@;
+import @PROGRAM_SOURCE@;
+import @NAMESPACE@.gl.texture.DepthBufferFormat;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL30;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+/** Actual generated handlers plus pinned Iris resize/getter bytecode; not a live Mixin or GPU test. */
+public final class LegacySceneDepthContractTest {
+    private LegacySceneDepthContractTest() { }
+    private static native void setScale(float value);
+    private static final int MAIN = 9000;
+    private static int checks;
+    private static boolean beforeSource;
+    private static final DepthBufferFormat FORMAT = DepthBufferFormat.fromGlEnum(0x8CAC);
+
+    public static final class Hook extends PipelineMixin { }
+    public static final class Arguments extends Args {
+        Arguments(Object... values) { super(values); }
+        @Override public <T> void set(int index, T value) { values[index] = value; }
+        @Override public void setAll(Object... next) { System.arraycopy(next, 0, values, 0, values.length); }
+    }
+    public static final class Attachment extends GlFramebuffer {
+        private int depth, updates;
+        private boolean fail;
+        @Override public boolean hasDepthAttachment() { return true; }
+        @Override public void addDepthAttachment(int texture) {
+            if (fail) throw new IllegalStateException("injected attachment failure");
+            if (texture != MAIN && DepthTexture.current(texture).closes != 0) {
+                throw new AssertionError("closed scene depth attached");
+            }
+            depth = texture;
+            updates++;
+        }
+    }
+    private static Object uninitialized(Class<?> type) throws ReflectiveOperationException {
+        Class<?> unsafe = Class.forName("sun.misc.Unsafe");
+        Field singleton = unsafe.getDeclaredField("theUnsafe");
+        singleton.setAccessible(true);
+        return unsafe.getMethod("allocateInstance", Class.class).invoke(singleton.get(null), type);
+    }
+    private static Field field(Class<?> owner, String name) throws ReflectiveOperationException {
+        Field result = owner.getDeclaredField(name);
+        result.setAccessible(true);
+        return result;
+    }
+    private static void set(Object target, Class<?> owner, String name, Object value) throws Exception {
+        field(owner, name).set(target, value);
+    }
+    private static void check(boolean value, String message) {
+        checks++;
+        if (!value) throw new AssertionError(message);
+    }
+    private static void handler(Hook hook, String name, Class<?>[] types, Object... args) throws Exception {
+        try {
+            var method = PipelineMixin.class.getDeclaredMethod(name, types);
+            method.setAccessible(true);
+            method.invoke(hook, args);
+        } catch (InvocationTargetException failure) {
+            if (failure.getCause() instanceof RuntimeException runtime) throw runtime;
+            if (failure.getCause() instanceof Error error) throw error;
+            throw failure;
+        }
+    }
+    private static void complete(Hook hook, boolean constructor) throws Exception {
+        if (beforeSource) return; // Old-source witnesses stop at the specific failed handoff assertion below.
+        handler(hook, constructor ? "mgfsr3$depthAllocated" : "mgfsr3$depthResized",
+                new Class<?>[]{CallbackInfo.class}, new CallbackInfo("host", false));
+    }
+    private static Arguments prepare(Hook hook, int sourceVersion, int width, int height) throws Exception {
+        Arguments args = new Arguments(sourceVersion, MAIN, width, height, FORMAT, null);
+        handler(hook, "mgfsr3$resize", new Class<?>[]{Args.class}, args);
+        return args;
+    }
+    private static boolean resize(RenderTargets targets, Arguments args) {
+        return targets.resizeIfNeeded(args.<Integer>get(0), args.<Integer>get(1),
+                args.<Integer>get(2), args.<Integer>get(3), FORMAT, null);
+    }
+    private static ProgramSet programs() throws Exception {
+        ProgramSet programs = (ProgramSet) uninitialized(ProgramSet.class);
+        ProgramSource source = (ProgramSource) uninitialized(ProgramSource.class);
+        set(source, ProgramSource.class, "vertexSource", "host allocation probe");
+        set(source, ProgramSource.class, "fragmentSource", "host allocation probe");
+@PROGRAM_FIXTURE@
+        return programs;
+    }
+    private static RenderTargets targets(Arguments ctor, Attachment one, Attachment two,
+                                         Attachment handDestination, Attachment translucentDestination) throws Exception {
+        RenderTargets targets = (RenderTargets) uninitialized(RenderTargets.class);
+        int width = ctor.get(0), height = ctor.get(1), depth = ctor.get(2), generation = ctor.get(3);
+        set(targets, RenderTargets.class, "currentDepthTexture", depth);
+        set(targets, RenderTargets.class, "cachedDepthBufferVersion", generation);
+        set(targets, RenderTargets.class, "cachedWidth", width);
+        set(targets, RenderTargets.class, "cachedHeight", height);
+        set(targets, RenderTargets.class, "currentDepthFormat", FORMAT);
+        Field colors = field(RenderTargets.class, "targets");
+        colors.set(targets, Array.newInstance(colors.getType().getComponentType(), 0));
+        DepthTexture hand = new DepthTexture(width, height, FORMAT);
+        DepthTexture translucent = new DepthTexture(width, height, FORMAT);
+        set(targets, RenderTargets.class, "noHand", hand);
+        set(targets, RenderTargets.class, "noTranslucents", translucent);
+        set(targets, RenderTargets.class, "noHandDestFb", handDestination);
+        set(targets, RenderTargets.class, "noTranslucentsDestFb", translucentDestination);
+        set(targets, RenderTargets.class, "ownedFramebuffers", List.of(one, two, handDestination, translucentDestination));
+        one.depth = two.depth = depth;
+        handDestination.depth = hand.id;
+        translucentDestination.depth = translucent.id;
+        return targets;
+    }
+    public static void main(String[] command) throws Exception {
+        beforeSource = command.length == 3;
+        System.load(command[0]);
+        System.load(command[1]);
+        set(null, NativeBridge.class, "helperLoaded", true);
+        System.setProperty("mg.fsr3.library", command[1]);
+        check(field(Fsr3Bridge.class, "LOADED").getBoolean(null), "real JNI transport initialized");
+        Hook hook = new Hook();
+        Arguments ctor = new Arguments(1920, 1080, MAIN, 7, FORMAT, null, null);
+        handler(hook, "mgfsr3$allocate", new Class<?>[]{Args.class, ProgramSet.class}, ctor, programs());
+        int first = ctor.get(2);
+        check(first > 127 && first != MAIN && ctor.<Integer>get(3) == 7, "constructor identity and initial generation");
+        check(ctor.<Integer>get(0) == 1097 && ctor.<Integer>get(1) == 617, "constructor color/depth extent scales together");
+        Attachment one = (Attachment) uninitialized(Attachment.class), two = (Attachment) uninitialized(Attachment.class);
+        Attachment handDestination = (Attachment) uninitialized(Attachment.class);
+        Attachment translucentDestination = (Attachment) uninitialized(Attachment.class);
+        RenderTargets targets = targets(ctor, one, two, handDestination, translucentDestination);
+        int hand = handDestination.depth, translucent = translucentDestination.depth;
+        complete(hook, true);
+
+        if (beforeSource && command[2].equals("native-aa")) {
+            setScale(1);
+            Arguments aa = prepare(hook, 7, 1920, 1080);
+            check(aa.<Integer>get(1) == MAIN, "NativeAA selects original source");
+            check(Fsr3Bridge.sceneDepthTextureId() == 0, "NativeAA must stop submitting stale managed scene depth");
+            throw new AssertionError("old-source NativeAA regression unexpectedly passed");
+        }
+        for (int at = 0; at < 24; at++) {
+            Arguments stable = prepare(hook, 7, 1920, 1080);
+            check(stable.<Integer>get(0) == 7 && stable.<Integer>get(1) == first, "same >127 ID keeps generation stable");
+            check(!resize(targets, stable), "unchanged frame returns false");
+            complete(hook, false);
+        }
+        check(one.updates == 0 && two.updates == 0, "unchanged frames do not reattach");
+        // Show the pinned renderer's actual dependency before exercising the handler fix.
+        check(!targets.resizeIfNeeded(7, MAIN, ctor.get(0), ctor.get(1), FORMAT, null), "same source generation returns false");
+        check(targets.getDepthTexture() == first && one.depth == first, "raw Iris ignores a replacement without a new generation");
+        setScale(1.5f);
+        Arguments quality = prepare(hook, 7, 1920, 1080);
+        int second = quality.get(1);
+        check(second != first && quality.<Integer>get(0) != 7, "quality replacement must advance unchanged source generation");
+        check(DepthTexture.current(first).closes == 0, "old depth remains alive before Iris adopts replacement");
+        check(resize(targets, quality), "quality change updates dimensions");
+        check(targets.getDepthTexture() == second && one.depth == second && two.depth == second, "actual Iris cache and attachments adopt new depth");
+        check(handDestination.depth == hand && translucentDestination.depth == translucent, "upstream snapshot skips remain intact");
+        check(DepthTexture.current(hand).width == 1280 && DepthTexture.current(hand).height == 720, "snapshot resizes its original storage identity");
+        complete(hook, false);
+        check(DepthTexture.current(first).closes == 1 && DepthTexture.current(second).closes == 0, "normal completion retires only old owned depth");
+
+        // A new managed allocation at unchanged extent still needs completion when Iris returns false.
+        set(null, Fsr3Bridge.class, "managedFormat", 0);
+        Arguments sameSize = prepare(hook, 7, 1920, 1080);
+        int third = sameSize.get(1);
+        check(third != second && !resize(targets, sameSize), "same-size replacement adopted despite false resize result");
+        check(targets.getDepthTexture() == third && one.depth == third && DepthTexture.current(second).closes == 0, "adoption precedes retirement");
+        complete(hook, false);
+        check(DepthTexture.current(second).closes == 1, "false-return completion releases old allocation");
+        Arguments sourceChange = prepare(hook, 99, 1920, 1080);
+        check(sourceChange.<Integer>get(0).intValue() != sameSize.<Integer>get(0).intValue()
+                && sourceChange.<Integer>get(1) == third, "source-only generation change propagates");
+        resize(targets, sourceChange);
+        complete(hook, false);
+
+        setScale(1);
+        Arguments aa = prepare(hook, 99, 1280, 720);
+        check(aa.<Integer>get(1) == MAIN && Fsr3Bridge.sceneDepthTextureId() == 0, "NativeAA uses main depth and submits zero managed ID");
+        check(DepthTexture.current(third).closes == 0, "NativeAA keeps old attachment alive until adoption");
+        two.fail = true;
+        try { resize(targets, aa); throw new AssertionError("attachment failure lost"); }
+        catch (IllegalStateException expected) {
+            check(targets.getDepthTexture() == MAIN && one.depth == MAIN && two.depth == third, "throwing resize exposes partial adoption");
+        }
+        check(DepthTexture.current(third).closes == 0, "failed resize retains referenced resources");
+        Arguments retry = prepare(hook, 99, 1280, 720);
+        check(retry.<Integer>get(0).intValue() != aa.<Integer>get(0).intValue(), "retry advances partially published generation");
+        two.fail = false;
+        check(!resize(targets, retry), "NativeAA adoption completes even with unchanged dimensions");
+        complete(hook, false);
+        check(two.depth == MAIN && DepthTexture.current(third).closes == 1, "successful retry releases retired depth");
+        Arguments stableAa = prepare(hook, 99, 1280, 720);
+        check(stableAa.<Integer>get(0).intValue() == retry.<Integer>get(0).intValue(), "repeated NativeAA has stable value identity");
+        resize(targets, stableAa);
+        complete(hook, false);
+
+        // GL may recycle the prior allocation's name after it has been deleted.
+        DepthTexture.nextId = third;
+        setScale(1.5f);
+        Arguments reused = prepare(hook, 99, 1920, 1080);
+        check(reused.<Integer>get(1) == third && reused.<Integer>get(0).intValue() != stableAa.<Integer>get(0).intValue(), "NativeAA to recycled managed ID advances generation");
+        resize(targets, reused);
+        complete(hook, false);
+        long previousAllocation = Fsr3Bridge.sceneDepthAllocationVersion();
+        Fsr3Bridge.destroySceneDepth();
+        DepthTexture.nextId = third;
+        Arguments sameName = prepare(hook, 99, 1920, 1080);
+        check(sameName.<Integer>get(1) == third && Fsr3Bridge.sceneDepthAllocationVersion() != previousAllocation
+                && sameName.<Integer>get(0).intValue() != reused.<Integer>get(0).intValue(), "same numeric name after teardown uses a new allocation generation");
+        resize(targets, sameName);
+        complete(hook, false);
+        check(one.depth == third && DepthTexture.current(third).closes == 0, "recycled name points to live current allocation");
+
+        setScale(2);
+        GL30.failAttachment = true;
+        int before = DepthTexture.allocations.size();
+        try { prepare(hook, 99, 1920, 1080); throw new AssertionError("allocation failure lost"); }
+        catch (IllegalStateException expected) {
+            check(DepthTexture.allocations.size() == before + 1 && DepthTexture.allocations.get(before).closes == 1,
+                    "failed uncommitted allocation closes exactly once");
+            check(Fsr3Bridge.sceneDepthTextureId() == third && DepthTexture.current(third).closes == 0, "allocation failure preserves current ownership");
+        } finally { GL30.failAttachment = false; }
+        setScale(1.5f);
+        for (String reason : new String[]{"no-final", "no-context", "invalid-size"}) {
+            if (reason.equals("no-final")) Fsr3Bridge.setPackHasFinalPass(false);
+            if (reason.equals("no-context")) GL.active = false;
+            Arguments fallback = prepare(hook, 99, reason.equals("invalid-size") ? 0 : 1920, 1080);
+            check(fallback.<Integer>get(1) == MAIN && Fsr3Bridge.sceneDepthTextureId() == 0, reason + " selects original and clears managed submission");
+            // Invalid zero-size input is not passed into a real renderer; caller teardown releases it.
+            if (reason.equals("invalid-size")) Fsr3Bridge.destroySceneDepth();
+            else { resize(targets, fallback); complete(hook, false); }
+            Fsr3Bridge.setPackHasFinalPass(true);
+            GL.active = true;
+            Arguments enabled = prepare(hook, 99, 1920, 1080);
+            resize(targets, enabled);
+            complete(hook, false);
+        }
+        Fsr3Bridge.destroySceneDepth();
+        check(handDestination.depth == hand && translucentDestination.depth == translucent
+                && DepthTexture.current(hand).closes == 0 && DepthTexture.current(translucent).closes == 0,
+                "no transition owns or destroys Iris snapshots or Minecraft main depth");
+        SceneDepthGeneration wrap = new SceneDepthGeneration();
+        check(wrap.prepare(Integer.MAX_VALUE, 501, 1) == Integer.MAX_VALUE, "primitive initial generation");
+        wrap.complete();
+        check(wrap.prepare(Integer.MAX_VALUE, 501, 2) == Integer.MIN_VALUE, "allocation revision advances same ID across wrap");
+        wrap.complete();
+        check(wrap.prepare(Integer.MAX_VALUE, 501, 2) == Integer.MIN_VALUE, "same ID/epoch remains stable after wrap");
+        wrap.complete();
+        check(wrap.prepare(Integer.MAX_VALUE, 502, 2) == Integer.MIN_VALUE + 1,
+                "different primitive ID advances despite unchanged source and allocation versions");
+        System.out.println("PASS legacy generated-handler and pinned depth-cache contract @PROFILE@: " + checks + " checks; GPU/live Mixin NOT RUN");
+    }
+}

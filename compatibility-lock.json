@@ -773,6 +773,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "60ca878c4d30ea89a15d8407358a43371f7c08f846322ba2cddcd5ab6aca4e8e",
+        "resize_code_sha256": "38154717f9f2ce6e4c44b437bd93d29e8a9af1d56f9a97d8f2e11b0077c8ea77",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/irisshaders/iris/targets/DepthTexture;",
+          "noTranslucents": "Lnet/irisshaders/iris/targets/DepthTexture;"
+        }
       }
     },
     {
@@ -992,6 +1006,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "a255af8863d56ba7a951ef6476187f0066e30444e427f6b8f9ada489b42fc780",
+        "resize_code_sha256": "ac3f8ec4837d53f97d1201f4c6353a07eb16449ace0ed11ef7094f5967de9d81",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/irisshaders/iris/targets/DepthTexture;",
+          "noTranslucents": "Lnet/irisshaders/iris/targets/DepthTexture;"
+        }
       }
     },
     {
@@ -1218,6 +1246,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "60ca878c4d30ea89a15d8407358a43371f7c08f846322ba2cddcd5ab6aca4e8e",
+        "resize_code_sha256": "38154717f9f2ce6e4c44b437bd93d29e8a9af1d56f9a97d8f2e11b0077c8ea77",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/irisshaders/iris/targets/DepthTexture;",
+          "noTranslucents": "Lnet/irisshaders/iris/targets/DepthTexture;"
+        }
       }
     },
     {
@@ -1444,6 +1486,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "60ca878c4d30ea89a15d8407358a43371f7c08f846322ba2cddcd5ab6aca4e8e",
+        "resize_code_sha256": "38154717f9f2ce6e4c44b437bd93d29e8a9af1d56f9a97d8f2e11b0077c8ea77",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/irisshaders/iris/targets/DepthTexture;",
+          "noTranslucents": "Lnet/irisshaders/iris/targets/DepthTexture;"
+        }
       }
     },
     {
@@ -1670,6 +1726,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "0d6c078a02357ef307824686a5bafa3c7c5cc356341b41e0f85c0989e4239a9e",
+        "resize_code_sha256": "47bc2327da0bc06702a75dc7a26412fe21503702ed535407f048befd9eb4a2f1",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/coderbot/iris/rendertarget/DepthTexture;",
+          "noTranslucents": "Lnet/coderbot/iris/rendertarget/DepthTexture;"
+        }
       }
     },
     {
@@ -1896,6 +1966,20 @@
           "WORLD_BORDER",
           "HAND_TRANSLUCENT"
         ]
+      },
+      "depth_contract": {
+        "constructor_code_sha256": "4845d0d56a437a685243aef199383be70870997ad812d0bb894e48d820f539c3",
+        "resize_code_sha256": "7906d66567d95f077d2cf80a30c0b2e995b9884ac6c9a94380d9e360cb75a407",
+        "fields": {
+          "cachedDepthBufferVersion": "I",
+          "currentDepthTexture": "I",
+          "cachedWidth": "I",
+          "cachedHeight": "I",
+          "noHandDestFb": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;",
+          "noHand": "Lnet/coderbot/iris/rendertarget/DepthTexture;",
+          "noTranslucents": "Lnet/coderbot/iris/rendertarget/DepthTexture;"
+        }
       }
     }
   ]

@@ -1,0 +1,35 @@
+package @DEPTH_PACKAGE@;
+
+import @NAMESPACE@.gl.texture.DepthBufferFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+/** Host allocation/ownership probe. RenderTargets methods remain the pinned artifact's bytes. */
+public final class DepthTexture {
+    public static int nextId = 701;
+    public static final List<DepthTexture> allocations = new ArrayList<>();
+    public final int id;
+    public int width, height, closes;
+    public DepthTexture(int width, int height, DepthBufferFormat format) {
+        this.id = nextId++;
+        resize(width, height, format);
+        allocations.add(this);
+    }
+    public DepthTexture(String name, int width, int height, DepthBufferFormat format) {
+        this(width, height, format);
+    }
+    public int getTextureId() { return id; }
+    public void resize(int width, int height, DepthBufferFormat format) {
+        if (closes != 0) throw new AssertionError("closed snapshot resized");
+        this.width = width;
+        this.height = height;
+    }
+    public void destroy() { closes++; }
+    public static DepthTexture current(int id) {
+        for (int at = allocations.size() - 1; at >= 0; at--) {
+            DepthTexture texture = allocations.get(at);
+            if (texture.id == id) return texture;
+        }
+        throw new AssertionError("unknown owned texture " + id);
+    }
+}

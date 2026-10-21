@@ -8,6 +8,18 @@ public final class SceneDepthGeneration {
     private int generation;
     private Object selectedDepth;
 
+    private record LegacyDepth(int texture, long allocationVersion) {}
+
+    /** Compare legacy GL names by value, including reuse by a different owned allocation. */
+    public int prepare(int version, int texture, long allocationVersion) {
+        Object identity = selectedDepth;
+        if (!(identity instanceof LegacyDepth previous)
+                || previous.texture() != texture || previous.allocationVersion() != allocationVersion) {
+            identity = new LegacyDepth(texture, allocationVersion);
+        }
+        return prepare(version, identity);
+    }
+
     public int prepare(int version, Object depth) {
         if (depth == null) throw new IllegalArgumentException("missing scene depth");
         if (!initialized) {

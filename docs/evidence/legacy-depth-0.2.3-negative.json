@@ -1,0 +1,86 @@
+[
+  {
+    "profile": "1.21.1-fabric",
+    "witness": "quality",
+    "old_jar_sha256": "7cb07b7a4ba2e341a6dd42537ac1b697cef1660c0896309b1f2a171cde94baea",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.21.1-fabric",
+    "witness": "native-aa",
+    "old_jar_sha256": "7cb07b7a4ba2e341a6dd42537ac1b697cef1660c0896309b1f2a171cde94baea",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.21.1-neoforge",
+    "witness": "quality",
+    "old_jar_sha256": "f255d6dfb797235b8fae8c5ebadd91505d10df8d1c2f44706497f2f223331778",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.21.1-neoforge",
+    "witness": "native-aa",
+    "old_jar_sha256": "f255d6dfb797235b8fae8c5ebadd91505d10df8d1c2f44706497f2f223331778",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.20.1-fabric",
+    "witness": "quality",
+    "old_jar_sha256": "5c1044b02d188541e44be2f75576f1c27af4df20dca977b916cd8226b68dbbd8",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.20.1-fabric",
+    "witness": "native-aa",
+    "old_jar_sha256": "5c1044b02d188541e44be2f75576f1c27af4df20dca977b916cd8226b68dbbd8",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.20.1-forge",
+    "witness": "quality",
+    "old_jar_sha256": "3b7d7d28c11cc8e56b874a08d256ba4d5cf4fdd95ef87c408bd9bd1be36ae3e7",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.20.1-forge",
+    "witness": "native-aa",
+    "old_jar_sha256": "3b7d7d28c11cc8e56b874a08d256ba4d5cf4fdd95ef87c408bd9bd1be36ae3e7",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.18.2-fabric",
+    "witness": "quality",
+    "old_jar_sha256": "162a797efdf4b7920e114c8667a747a1f8cc00ef465218b0950f1524bef5b9c5",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.18.2-fabric",
+    "witness": "native-aa",
+    "old_jar_sha256": "162a797efdf4b7920e114c8667a747a1f8cc00ef465218b0950f1524bef5b9c5",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.18.2-forge",
+    "witness": "quality",
+    "old_jar_sha256": "69d4deeacaed63edc4e89d91c12730f22b21bcd49eec06a4c1699a86fc8ef6a6",
+    "assertion": "quality replacement must advance unchanged source generation",
+    "exit_code": 1
+  },
+  {
+    "profile": "1.18.2-forge",
+    "witness": "native-aa",
+    "old_jar_sha256": "69d4deeacaed63edc4e89d91c12730f22b21bcd49eec06a4c1699a86fc8ef6a6",
+    "assertion": "NativeAA must stop submitting stale managed scene depth",
+    "exit_code": 1
+  }
+]

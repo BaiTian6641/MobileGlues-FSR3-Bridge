@@ -190,6 +190,7 @@ public final class Fsr3Bridge {
     private static int managedFormat;
     private static int managedUsage;
     private static int managedDepthFbo;
+    private static long managedAllocationVersion;
     private record RetiredDepth(Object texture, int framebuffer) {}
     private static final java.util.List<RetiredDepth> retiredDepths = new java.util.ArrayList<>();
 
@@ -199,7 +200,18 @@ public final class Fsr3Bridge {
      * texture is owned by the bridge and is not the noHand snapshot.
      */
     public static synchronized int sceneDepthTexture(int original, int width, int height) {
+        if (!LOADED || !packHasFinalPass || !AdapterProfile.supportsSceneScaling()
+                || !AdapterProfile.hasOpenGlContext() || width <= 0 || height <= 0
+                || NativeBridge.scale() <= 1.001f) {
+            retireManagedDepth();
+            return original;
+        }
         return allocateSceneDepth(original, width, height, null);
+    }
+
+    /** Distinguishes managed allocations even if GL later recycles the same texture name. */
+    public static synchronized long sceneDepthAllocationVersion() {
+        return managedAllocationVersion;
     }
 
     /** 26.2 owns a GpuTexture object; retain that ownership contract while replacing its extent. */
@@ -239,15 +251,14 @@ public final class Fsr3Bridge {
             Object previous = managedDepth;
             int previousFbo = managedDepthFbo;
             managedDepth = next;
+            managedAllocationVersion++;
             managedDepthFbo = nextFbo;
             managedWidth = width;
             managedHeight = height;
             managedFormat = format;
             managedUsage = usage;
             if (previous != null) {
-                RetiredDepth retired = new RetiredDepth(previous, previousFbo);
-                if (sourceGpu != null) retiredDepths.add(retired);
-                else destroyDepthResource(retired);
+                retiredDepths.add(new RetiredDepth(previous, previousFbo));
             }
             mark("scene depth " + width + "x" + height + " id=" + nextId + " format=" + format);
             return nextId;
@@ -267,7 +278,10 @@ public final class Fsr3Bridge {
 
     /** Defer deletion until Iris has replaced every cached depth reference and attachment. */
     private static void retireManagedDepth() {
-        if (managedDepth != null) retiredDepths.add(new RetiredDepth(managedDepth, managedDepthFbo));
+        if (managedDepth != null) {
+            retiredDepths.add(new RetiredDepth(managedDepth, managedDepthFbo));
+            managedAllocationVersion++;
+        }
         managedDepth = null;
         managedDepthFbo = 0;
         managedWidth = managedHeight = managedFormat = managedUsage = 0;

@@ -127,8 +127,23 @@ def verify_hooks(profile, artifact):
             invocations = {name: attrs.get('_invocations', []) for name, _, _, attrs in pipeline_methods}
             target = profile['classes']['RenderTargets'].replace('.', '/')
             for method, name in [('<init>', '<init>'), ('beginLevelRendering', 'resizeIfNeeded')]:
-                if (target, name, descriptor(profile, 'RenderTargets', name)) not in invocations[method]:
+                call = (target, name, descriptor(profile, 'RenderTargets', name))
+                if call not in invocations[method]:
                     raise ValueError('missing scene allocation call ' + name)
+                if profile['depth_resource'] == 'gl_texture_id' and invocations[method].count(call) != 1:
+                    raise ValueError('legacy scene allocation call count drift: ' + name)
+        if profile['depth_resource'] == 'gl_texture_id':
+            _, target_methods, _, fields = methods(jar.read(target + '.class'), include_fields=True)
+            contract = profile['depth_contract']
+            for name, key in [('<init>', 'constructor_code_sha256'), ('resizeIfNeeded', 'resize_code_sha256')]:
+                code = next(attrs['Code'] for method, desc, _, attrs in target_methods
+                            if method == name and desc == descriptor(profile, 'RenderTargets', name))
+                if sha(code) != contract[key]:
+                    raise ValueError('legacy depth generation/attachment contract drift: ' + name)
+                evidence.append(target + '.' + name + ':verified-depth-generation-bytecode')
+            actual = {(name, desc) for name, desc, _, _ in fields}
+            if not all((name, desc) in actual for name, desc in contract['fields'].items()):
+                raise ValueError('legacy depth cache/snapshot field drift')
         if profile['depth_resource'] == 'gpu_texture':
             _, target_methods, _ = methods(jar.read(target + '.class'))
             resize = next(attrs['Code'] for name, desc, _, attrs in target_methods
