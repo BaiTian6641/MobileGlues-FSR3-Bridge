@@ -77,6 +77,7 @@ public final class NativeBridge {
 
     static native boolean init(String corePath);
     static native boolean available();
+    static native boolean depthConvention(int flags);
     static native float scale();
     static native void viewport();
     static native void camera(float[] modelView, float[] projection, double[] cameraPosition);

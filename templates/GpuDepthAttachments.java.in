@@ -1,0 +1,23 @@
+    @org.spongepowered.asm.mixin.Shadow
+    private com.mojang.blaze3d.textures.GpuTexture noHand;
+    @org.spongepowered.asm.mixin.Shadow
+    private com.mojang.blaze3d.textures.GpuTexture noTranslucents;
+    @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final
+    private @FRAMEBUFFER_CLASS@ noHandDestFb;
+    @org.spongepowered.asm.mixin.Shadow @org.spongepowered.asm.mixin.Final
+    private @FRAMEBUFFER_CLASS@ noTranslucentsDestFb;
+
+    @org.spongepowered.asm.mixin.injection.Redirect(method = "resizeIfNeeded@RESIZE_DESCRIPTOR@",
+            at = @At(value = "INVOKE", target = "@TARGET_DEPTH_ATTACHMENT@"), require = 3)
+    private void mgfsr3$preserveDepthSnapshot(@FRAMEBUFFER_CLASS@ framebuffer,
+            com.mojang.blaze3d.textures.GpuTexture depth) {
+        // Iris also registers the two snapshot destinations in ownedFramebuffers.
+        // A scene-generation rebind must keep their distinct snapshot textures.
+        com.mojang.blaze3d.textures.GpuTexture selected = depth;
+        if (framebuffer != null && framebuffer == noHandDestFb) {
+            selected = java.util.Objects.requireNonNull(noHand, "missing hand depth snapshot");
+        } else if (framebuffer != null && framebuffer == noTranslucentsDestFb) {
+            selected = java.util.Objects.requireNonNull(noTranslucents, "missing translucent depth snapshot");
+        }
+        framebuffer.addDepthAttachment(selected);
+    }

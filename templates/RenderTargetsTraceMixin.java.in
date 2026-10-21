@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Records allocation, resize and the depth snapshots that precede hands and translucent geometry. */
 @Mixin(targets = "@TARGETS_CLASS@", remap = false)
 public abstract class RenderTargetsTraceMixin {
+@DEPTH_ATTACHMENT_HOOKS@
     @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     private void mgfsr3$allocation(CallbackInfo callback) { DiagnosticTrace.irisTargets(this, "ALLOCATION"); }
     @Inject(method = "resizeIfNeeded@RESIZE_DESCRIPTOR@", at = @At("RETURN"), require = 1)

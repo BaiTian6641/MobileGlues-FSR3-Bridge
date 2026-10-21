@@ -228,6 +228,18 @@
           "width": "I",
           "height": "I"
         }
+      },
+      "depth_convention": 1,
+      "depth_contract": {
+        "resize_code_sha256": "137dda4966df3a2ec95bb9c555449b4511f74ca55673be35c8e5f63f40714365",
+        "game_render_descriptor": "(Lnet/minecraft/client/DeltaTracker;Z)V",
+        "game_render_code_sha256": "12d9d579b27cdb15c368cd34bc8320159cc448f4bbadd45ffcfaa3fa37e6cb63",
+        "snapshot_fields": {
+          "noHand": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        }
       }
     },
     {
@@ -457,6 +469,18 @@
           "width": "I",
           "height": "I"
         }
+      },
+      "depth_convention": 1,
+      "depth_contract": {
+        "resize_code_sha256": "137dda4966df3a2ec95bb9c555449b4511f74ca55673be35c8e5f63f40714365",
+        "game_render_descriptor": "(Lnet/minecraft/client/DeltaTracker;Z)V",
+        "game_render_code_sha256": "12d9d579b27cdb15c368cd34bc8320159cc448f4bbadd45ffcfaa3fa37e6cb63",
+        "snapshot_fields": {
+          "noHand": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        }
       }
     },
     {
@@ -649,7 +673,8 @@
         "ExpressionAccess": {
           "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     },
     {
       "id": "1.21.1-neoforge",
@@ -834,7 +859,8 @@
         "ExpressionAccess": {
           "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     },
     {
       "id": "1.20.1-fabric",
@@ -1026,7 +1052,8 @@
         "ExpressionAccess": {
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     },
     {
       "id": "1.20.1-forge",
@@ -1218,7 +1245,8 @@
         "ExpressionAccess": {
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     },
     {
       "id": "1.18.2-fabric",
@@ -1410,7 +1438,8 @@
         "ExpressionAccess": {
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     },
     {
       "id": "1.18.2-forge",
@@ -1602,7 +1631,8 @@
         "ExpressionAccess": {
           "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
         }
-      }
+      },
+      "depth_convention": 0
     }
   ]
 }

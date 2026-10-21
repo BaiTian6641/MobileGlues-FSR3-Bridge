@@ -53,6 +53,12 @@ for 26.2 submissions. The renderer-side output guard is in MobileGlues 2.0.4-dev
 These corrections require the runtime checks described in the regression report;
 older smoke results do not qualify the new builds.
 
+Version 0.2.2 adds the 26.2 reversed sampled-depth negotiation, scene clear value,
+depth-generation and texture-retirement corrections, and preserves independent
+depth-copy attachments. It also fixes numeric texture IDs in diagnostic JSON and
+reports a missing diagnostic API once. See [depth conventions and ownership](docs/depth-lifecycle.md)
+for the exact contracts, host evidence and remaining device checks.
+
 ## Build
 
 Install Python 3.12+, JDK 25, and Android NDK **28.2.13676358 (r28c)**. JDK 25 is
@@ -68,7 +74,7 @@ python3 tools/test.py --profile all
 
 To build one lane, for example, use `sh build.sh --profile 1.21.1-neoforge`.
 `JAVAC=/path/to/jdk25/bin/javac` selects a compiler explicitly. Build outputs are
-`dist/mgfsr3bridge-0.2.1-<minecraft>-<loader>.jar`, with per-profile JSON reports.
+`dist/mgfsr3bridge-0.2.2-<minecraft>-<loader>.jar`, with per-profile JSON reports.
 Every JAR includes Android `arm64-v8a` and `x86_64` helpers with 16 KB-aligned ELF
 segments. x86_64 is an ABI build lane and does not establish target-device support.
 
@@ -101,7 +107,8 @@ not a Minecraft/device qualification.
 - Camera capture handles legacy Mojang matrices and loader-specific vector field
   mappings. A failed capture invalidates native camera history rather than reusing
   stale matrices.
-- Diagnostics are opt-in using `mgfsr3-trace.arm` in the game directory and bounded
+- Diagnostics require a renderer built with `MG_FSR3_DIAGNOSTICS=ON`; they are opt-in
+  using `mgfsr3-trace.arm` in the game directory and bounded
   to 120 frames, 3,000 events and 12 Mi UTF-16 code units. Repeated submit errors are rate limited.
 
 ## Source and compatibility policy

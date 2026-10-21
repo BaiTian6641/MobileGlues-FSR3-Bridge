@@ -16,6 +16,7 @@ import zipfile
 from build import ROOT, VERSION, verify_hooks
 from package_metadata import MIXIN_CONFIG, verify_package_metadata
 from test_viewport_uniforms import check_viewport_uniforms
+from test_scene_depth import check_scene_depth
 
 
 def run(*args):
@@ -169,7 +170,9 @@ def main():
         run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.BridgeContractTest')
         run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.FinalViewportScopeTest')
         run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.SubmissionTargetTest')
+        run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.DiagnosticMetadataTest')
         check_viewport_uniforms(profile, javac, java)
+        check_scene_depth(profile, javac, java)
         altered = copy.deepcopy(profile)
         altered['methods']['FinalPassRenderer']['renderFinalPass'] = ['(I)V']
         try:
@@ -184,8 +187,11 @@ def main():
     run(*common, ROOT / 'src/main/cpp/mgfsrhelper.cpp', '-ldl', '-o', folder / 'helper.so')
     run(*common, '-DINCOMPLETE_ABI', ROOT / 'tests/core_fixture.cpp', '-o', folder / 'incomplete.so')
     run(*common, ROOT / 'tests/core_fixture.cpp', '-o', folder / 'complete.so')
+    run(*common, '-DDEPTH_CONVENTION', ROOT / 'tests/core_fixture.cpp', '-o', folder / 'depth-aware.so')
     run(java, '--enable-native-access=ALL-UNNAMED', '-cp', os.pathsep.join(map(str, [folder, baseline])), 'com.googlebook.fsrbridge.HelperContractTest',
         folder / 'helper.so', folder / 'incomplete.so', folder / 'complete.so')
+    run(java, '--enable-native-access=ALL-UNNAMED', '-cp', os.pathsep.join(map(str, [folder, baseline])),
+        'com.googlebook.fsrbridge.DepthConventionContractTest', folder / 'helper.so', folder / 'depth-aware.so')
     for source in (ROOT / 'tools').glob('*.py'):
         ast.parse(source.read_text(), filename=str(source))
     print('PASS Python AST and package isolation checks; game/device tests NOT RUN')

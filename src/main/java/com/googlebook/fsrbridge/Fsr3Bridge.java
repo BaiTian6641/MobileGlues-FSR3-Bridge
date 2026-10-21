@@ -57,7 +57,12 @@ public final class Fsr3Bridge {
             return false;
         }
         mark("helper init " + path);
-        return NativeBridge.load(path);
+        if (!NativeBridge.load(path)) return false;
+        if (!NativeBridge.depthConvention(AdapterProfile.depthConvention())) {
+            mark("renderer does not support this adapter's depth convention; bridge disabled");
+            return false;
+        }
+        return true;
     }
 
     private static boolean cameraWarning;
@@ -185,6 +190,8 @@ public final class Fsr3Bridge {
     private static int managedFormat;
     private static int managedUsage;
     private static int managedDepthFbo;
+    private record RetiredDepth(Object texture, int framebuffer) {}
+    private static final java.util.List<RetiredDepth> retiredDepths = new java.util.ArrayList<>();
 
     /**
      * Give the scaled Iris color targets a matching scene depth.
@@ -197,7 +204,10 @@ public final class Fsr3Bridge {
 
     /** 26.2 owns a GpuTexture object; retain that ownership contract while replacing its extent. */
     public static synchronized Object sceneDepthObject(Object original, int width, int height) {
-        if (!LOADED || !packHasFinalPass || !AdapterProfile.hasOpenGlContext() || NativeBridge.scale() <= 1.001f) return original;
+        if (!LOADED || !packHasFinalPass || !AdapterProfile.hasOpenGlContext() || NativeBridge.scale() <= 1.001f) {
+            retireManagedDepth();
+            return original;
+        }
         int originalId = AdapterProfile.textureId(original);
         int selected = allocateSceneDepth(originalId, width, height, original);
         return selected == originalId ? original : managedDepth;
@@ -215,11 +225,16 @@ public final class Fsr3Bridge {
                 return AdapterProfile.textureId(managedDepth);
             }
             Object next = AdapterProfile.createDepth(width, height, format, sourceGpu);
-            int nextId = AdapterProfile.textureId(next);
-            int nextFbo = createDepthFbo(nextId);
-            if (nextFbo == 0) {
-                AdapterProfile.destroyDepth(next);
-                throw new IllegalStateException("scene depth framebuffer incomplete");
+            int nextId;
+            int nextFbo = 0;
+            boolean ready = false;
+            try {
+                nextId = AdapterProfile.textureId(next);
+                nextFbo = createDepthFbo(nextId);
+                if (nextFbo == 0) throw new IllegalStateException("scene depth framebuffer incomplete");
+                ready = true;
+            } finally {
+                if (!ready) destroyDepthResource(new RetiredDepth(next, nextFbo));
             }
             Object previous = managedDepth;
             int previousFbo = managedDepthFbo;
@@ -230,13 +245,10 @@ public final class Fsr3Bridge {
             managedFormat = format;
             managedUsage = usage;
             if (previous != null) {
-                try {
-                    AdapterProfile.destroyDepth(previous);
-                } catch (Exception | LinkageError failure) {
-                    warn("previous scene depth cleanup failed: " + failure);
-                }
+                RetiredDepth retired = new RetiredDepth(previous, previousFbo);
+                if (sourceGpu != null) retiredDepths.add(retired);
+                else destroyDepthResource(retired);
             }
-            if (previousFbo != 0) deleteFbo(previousFbo);
             mark("scene depth " + width + "x" + height + " id=" + nextId + " format=" + format);
             return nextId;
         } catch (Exception | LinkageError t) {
@@ -249,17 +261,31 @@ public final class Fsr3Bridge {
     }
 
     public static synchronized void destroySceneDepth() {
-        if (managedDepth == null) return;
-        try {
-            AdapterProfile.destroyDepth(managedDepth);
-        } catch (Exception | LinkageError failure) {
-            warn("optional bridge cleanup/resolution failed: " + failure);
-        }
+        retireManagedDepth();
+        completeSceneDepthUpdate();
+    }
+
+    /** Defer deletion until Iris has replaced every cached depth reference and attachment. */
+    private static void retireManagedDepth() {
+        if (managedDepth != null) retiredDepths.add(new RetiredDepth(managedDepth, managedDepthFbo));
         managedDepth = null;
+        managedDepthFbo = 0;
         managedWidth = managedHeight = managedFormat = managedUsage = 0;
-        if (managedDepthFbo != 0) {
-            deleteFbo(managedDepthFbo);
-            managedDepthFbo = 0;
+    }
+
+    /** A throwing Iris resize deliberately leaves retired resources alive until retry or teardown. */
+    public static synchronized void completeSceneDepthUpdate() {
+        for (RetiredDepth resource : retiredDepths) destroyDepthResource(resource);
+        retiredDepths.clear();
+    }
+
+    private static void destroyDepthResource(RetiredDepth resource) {
+        try {
+            AdapterProfile.destroyDepth(resource.texture());
+        } catch (Exception | LinkageError failure) {
+            warn("scene depth cleanup failed: " + failure);
+        } finally {
+            if (resource.framebuffer() != 0) deleteFbo(resource.framebuffer());
         }
     }
 
@@ -329,7 +355,7 @@ public final class Fsr3Bridge {
                 gl30.getMethod("glBindFramebuffer", int.class, int.class).invoke(null, 0x8CA9, managedDepthFbo);
                 if (scissor[0] != 0) gl11.getMethod("glDisable", int.class).invoke(null, 0x0C11);
                 gl11.getMethod("glDepthMask", boolean.class).invoke(null, true);
-                gl11.getMethod("glClearDepth", double.class).invoke(null, 1.0d);
+                gl11.getMethod("glClearDepth", double.class).invoke(null, AdapterProfile.sceneDepthClearValue());
                 gl11.getMethod("glClear", int.class).invoke(null, 0x0100);
             } finally {
                 try {

@@ -4,6 +4,11 @@ extern "C" {
 JNIEXPORT jboolean JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeAvailable(JNIEnv*, jclass) { return JNI_TRUE; }
 JNIEXPORT jint JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeSubmit(JNIEnv*, jclass) { return 23; }
 #ifndef INCOMPLETE_ABI
+#ifdef DEPTH_CONVENTION
+JNIEXPORT jboolean JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeDepthConvention(JNIEnv*, jclass, jint flags) {
+    return flags == 0 || flags == 1 ? JNI_TRUE : JNI_FALSE;
+}
+#endif
 JNIEXPORT jfloat JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeScale(JNIEnv*, jclass) { return 1.75f; }
 JNIEXPORT void JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeViewport(JNIEnv*, jclass) { }
 JNIEXPORT void JNICALL Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeCamera(JNIEnv*, jclass, jfloatArray, jfloatArray, jdoubleArray) { }

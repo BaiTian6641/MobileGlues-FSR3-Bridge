@@ -60,6 +60,8 @@ public final class BridgeContractTest {
         catch (IllegalStateException expected) { /* A failed scene clear must stay observable. */ }
         check(GL30.draw == 31 && GL30.read == 37, "FBO bindings after clear failure");
         check(GL11.scissor == 1 && GL11.depthMask == 0 && GL11.clearDepth == 0.75f, "clear state after clear failure");
+        check(GL11.clearedDepth == (AdapterProfile.value("minecraft").equals("26.2") ? 0.0f : 1.0f),
+                "scene depth clear matches the actual game depth convention");
         System.out.println("PASS bridge host contracts " + AdapterProfile.value("id"));
     }
 }

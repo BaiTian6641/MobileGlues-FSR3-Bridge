@@ -4,6 +4,7 @@ package org.lwjgl.opengl;
 public final class GL11 {
     public static int texture = 17, scissor = 1, depthMask = 0;
     public static float clearDepth = 0.75f;
+    public static float clearedDepth;
     public static boolean failQuery, failClear;
     public static int[] viewport = {3, 5, 900, 600};
     public static int textureWidth = 2880, textureHeight = 1800;
@@ -39,6 +40,7 @@ public final class GL11 {
     public static void glDepthMask(boolean value) { depthMask = value ? 1 : 0; }
     public static void glClearDepth(double value) { clearDepth = (float) value; }
     public static void glClear(int mask) {
+        clearedDepth = clearDepth;
         if (failClear) throw new IllegalStateException("injected clear failure");
     }
 }

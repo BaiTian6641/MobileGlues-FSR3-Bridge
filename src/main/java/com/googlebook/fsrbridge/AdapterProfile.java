@@ -40,6 +40,14 @@ public final class AdapterProfile {
         return Boolean.parseBoolean(value("scene_scaling"));
     }
 
+    public static int depthConvention() {
+        return Integer.parseInt(value("depth_convention"));
+    }
+
+    public static double sceneDepthClearValue() {
+        return depthConvention() == 1 ? 0.0d : 1.0d;
+    }
+
     /** 26.2 render-pass closure does not retain the main framebuffer binding. */
     public static MainSubmissionTarget bindSubmissionTarget(Object colorHolder) throws ReflectiveOperationException {
         if (!value("minecraft").equals("26.2")) return MainSubmissionTarget.unchanged();

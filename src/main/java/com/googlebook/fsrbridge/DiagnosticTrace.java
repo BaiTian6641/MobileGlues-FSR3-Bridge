@@ -33,6 +33,7 @@ public final class DiagnosticTrace {
 
     private static volatile boolean enabled;
     private static boolean diagnosticWarning;
+    private static boolean unavailableWarning;
     private static boolean finished;
     private static int frame;
     private static int armTicks;
@@ -186,7 +187,12 @@ public final class DiagnosticTrace {
     /** Pre-hand/pre-translucent copy metadata. */
     public static synchronized void copyEntry(String role, Object renderTargets) {
         if (!active()) return;
-        boolean hand = role.contains("HAND");
+        String extra = copyMetadata(renderTargets, role.contains("HAND"));
+        startRole(role, true);
+        snapshot(role + "_ENTRY", extra);
+    }
+
+    private static String copyMetadata(Object renderTargets, boolean hand) {
         Object dirtyValue = reflect(renderTargets, hand ? "handDepthDirty" : "translucentDepthDirty");
         Object strategy = reflect(renderTargets, "copyStrategy");
         Object width = reflect(renderTargets, "cachedWidth");
@@ -199,16 +205,15 @@ public final class DiagnosticTrace {
         first = field(extra, first, "dirty_path", dirty == null ? null
                 : (dirty ? "copyTexImage2D" : "depth_copy_strategy"));
         first = field(extra, first, "strategy", strategy == null ? null : strategy.getClass().getName());
-        first = rawField(extra, first, "width", width == null ? null : String.valueOf(width));
-        first = rawField(extra, first, "height", height == null ? null : String.valueOf(height));
-        first = callIntMethod(extra, first, renderTargets, "getDepthTexture", "source_depth_texture");
+        first = integerField(extra, first, "width", width);
+        first = integerField(extra, first, "height", height);
+        first = callTextureMethod(extra, first, renderTargets, "getDepthTexture", "source_depth_texture");
         first = reflectTextureId(extra, first, renderTargets, "noHand", "noHand_texture");
         first = reflectFboId(extra, first, renderTargets, "noHandDestFb", "noHand_dest_fbo");
         first = reflectTextureId(extra, first, renderTargets, "noTranslucents", "noTranslucents_texture");
         first = reflectFboId(extra, first, renderTargets, "noTranslucentsDestFb", "noTranslucents_dest_fbo");
         extra.append('}');
-        startRole(role, true);
-        snapshot(role + "_ENTRY", extra.toString());
+        return extra.toString();
     }
 
     public static synchronized void copyExit(String role) {
@@ -258,7 +263,11 @@ public final class DiagnosticTrace {
             if (!Files.isRegularFile(MARKER)) return;
             String config = NativeBridge.trace(OP_CONFIG, 0, 0, 0);
             if (config == null) {
-                Fsr3Bridge.mark("trace marker present but diagnostic core API is unavailable");
+                if (!unavailableWarning) {
+                    unavailableWarning = true;
+                    Fsr3Bridge.mark("trace marker present but diagnostic core API is unavailable; "
+                            + "build the renderer with MG_FSR3_DIAGNOSTICS=ON");
+                }
                 return;
             }
             configJson = config;
@@ -473,11 +482,11 @@ public final class DiagnosticTrace {
     }
 
 
-    private static boolean callIntMethod(StringBuilder out, boolean first, Object instance, String method,
+    private static boolean callTextureMethod(StringBuilder out, boolean first, Object instance, String method,
                                          String label) {
         try {
             Object value = instance.getClass().getMethod(method).invoke(instance);
-            return rawField(out, first, label, value == null ? null : String.valueOf(value));
+            return integerField(out, first, label, textureId(value));
         } catch (Exception | LinkageError t) {
             return rawField(out, first, label, null);
         }
@@ -485,13 +494,16 @@ public final class DiagnosticTrace {
 
     private static boolean reflectTextureId(StringBuilder out, boolean first, Object instance, String field,
                                             String label) {
-        Object texture = reflect(instance, field);
-        if (texture == null) return rawField(out, first, label, null);
+        return integerField(out, first, label, textureId(reflect(instance, field)));
+    }
+
+    private static Integer textureId(Object texture) {
+        if (texture == null) return null;
+        if (texture instanceof Integer id) return id;
         try {
-            Object value = texture.getClass().getMethod("getTextureId").invoke(texture);
-            return rawField(out, first, label, String.valueOf(value));
+            return AdapterProfile.textureId(texture);
         } catch (Exception | LinkageError t) {
-            return rawField(out, first, label, null);
+            return null;
         }
     }
 
@@ -501,7 +513,7 @@ public final class DiagnosticTrace {
         if (fbo == null) return rawField(out, first, label, null);
         try {
             Object value = fbo.getClass().getMethod("getId").invoke(fbo);
-            return rawField(out, first, label, String.valueOf(value));
+            return integerField(out, first, label, value);
         } catch (Exception | LinkageError t) {
             return rawField(out, first, label, null);
         }
@@ -518,8 +530,13 @@ public final class DiagnosticTrace {
     }
 
     private static boolean reflectInt(StringBuilder out, boolean first, Object instance, String name) {
-        Object value = reflect(instance, name);
-        return rawField(out, first, name, value == null ? null : String.valueOf(value));
+        return integerField(out, first, name, reflect(instance, name));
+    }
+
+    private static boolean integerField(StringBuilder out, boolean first, String name, Object value) {
+        String number = value instanceof Integer || value instanceof Long || value instanceof Short
+                || value instanceof Byte ? value.toString() : null;
+        return rawField(out, first, name, number);
     }
 
     private static boolean reflectObject(StringBuilder out, boolean first, Object instance, String name) {
@@ -529,15 +546,7 @@ public final class DiagnosticTrace {
 
     private static boolean reflectTexture(StringBuilder out, boolean first, Object instance, String field,
                                           String label) {
-        Object texture = reflect(instance, field);
-        if (texture == null) return field(out, first, label, null);
-        String id = null;
-        try {
-            id = String.valueOf(texture.getClass().getMethod("getTextureId").invoke(texture));
-        } catch (Exception | LinkageError failure) {
-            diagnosticFailure(failure);
-        }
-        return field(out, first, label + "_texture", id);
+        return integerField(out, first, label + "_texture", textureId(reflect(instance, field)));
     }
 
     private static boolean reflectFbo(StringBuilder out, boolean first, Object instance, String field, String label) {

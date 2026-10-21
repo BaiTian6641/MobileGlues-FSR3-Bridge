@@ -21,7 +21,7 @@ from classfile import methods
 from package_metadata import forge_pack_metadata, verify_artifact
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 NDK_VERSION = '28.2.13676358'
 
 
@@ -116,6 +116,25 @@ def verify_hooks(profile, artifact):
             for method, name in [('<init>', '<init>'), ('beginLevelRendering', 'resizeIfNeeded')]:
                 if (target, name, descriptor(profile, 'RenderTargets', name)) not in invocations[method]:
                     raise ValueError('missing scene allocation call ' + name)
+        if profile['depth_resource'] == 'gpu_texture':
+            _, target_methods, _ = methods(jar.read(target + '.class'))
+            resize = next(attrs['Code'] for name, desc, _, attrs in target_methods
+                          if name == 'resizeIfNeeded' and desc == descriptor(profile, 'RenderTargets', name))
+            if sha(resize) != profile['depth_contract']['resize_code_sha256']:
+                raise ValueError('GPU depth generation/attachment contract drift')
+            evidence.append(target + '.resizeIfNeeded:verified-generation-and-attachment-bytecode')
+            _, _, _, fields = methods(jar.read(target + '.class'), include_fields=True)
+            actual = {(name, desc) for name, desc, _, _ in fields}
+            for name, desc in profile['depth_contract']['snapshot_fields'].items():
+                if (name, desc) not in actual:
+                    raise ValueError('GPU depth snapshot field drift: ' + name)
+            invocation = (profile['classes']['GlFramebuffer'].replace('.', '/'),
+                          'addDepthAttachment', '(Lcom/mojang/blaze3d/textures/GpuTexture;)V')
+            calls = next(attrs['_invocations'] for name, desc, _, attrs in target_methods
+                         if name == 'resizeIfNeeded' and desc == descriptor(profile, 'RenderTargets', name))
+            if calls.count(invocation) != 3:
+                raise ValueError('GPU depth snapshot attachment call count drift')
+            evidence.append(target + '.resizeIfNeeded:verified-three-depth-attachment-calls')
     return evidence
 
 
@@ -135,7 +154,12 @@ def generate_sources(profile, folder):
         'CACHED_UNIFORM_CLASS': profile['classes']['CachedUniform'],
         'CUSTOM_CONSTRUCTOR': descriptor(profile, 'CustomUniforms', '<init>'),
         'FRAMEBUFFER_CLASS': profile['classes']['GlFramebuffer'],
+        'DEPTH_ATTACHMENT_HOOKS': '',
     }
+    if profile['depth_resource'] == 'gpu_texture':
+        replacements['TARGET_DEPTH_ATTACHMENT'] = ('L' + profile['classes']['GlFramebuffer'].replace('.', '/')
+                                                   + ';addDepthAttachment(Lcom/mojang/blaze3d/textures/GpuTexture;)V')
+        replacements['DEPTH_ATTACHMENT_HOOKS'] = template('GpuDepthAttachments', replacements)
     replacements.update({'AST_' + key.upper(): value for key, value in profile['viewport_ast_accessors'].items()})
     if profile['scene_scaling']:
         target = profile['classes']['RenderTargets'].replace('.', '/')
@@ -188,7 +212,7 @@ def resources(profile, classes):
                   'CustomUniformsMixin', 'CustomUniformDefinitionAccessor'],
               'injectors': {'defaultRequire': 1}}
     (classes / 'mixins.mgfsrbridge.json').write_text(json.dumps(mixins, indent=2) + '\n')
-    props = {key: profile[key] for key in ['id', 'minecraft', 'namespace', 'scene_scaling', 'matrix_store', 'camera_fields']}
+    props = {key: profile[key] for key in ['id', 'minecraft', 'namespace', 'scene_scaling', 'matrix_store', 'camera_fields', 'depth_convention']}
     props.update(profile['classes'])
     (classes / 'adapter.properties').write_text(''.join(f'{key}={str(value).lower() if isinstance(value, bool) else value}\n' for key, value in sorted(props.items())))
     (classes / 'META-INF').mkdir(exist_ok=True)
@@ -256,6 +280,13 @@ def build(profile, dependencies):
     evidence = verify_hooks(profile, artifact)
     if profile['minecraft'] == '26.2':
         with zipfile.ZipFile(dependencies['minecraft-26.2']) as game:
+            _, game_renderer, _ = methods(game.read('net/minecraft/client/renderer/GameRenderer.class'))
+            contract = profile['depth_contract']
+            code = next(attrs['Code'] for name, desc, _, attrs in game_renderer
+                        if name == 'render' and desc == contract['game_render_descriptor'])
+            if sha(code) != contract['game_render_code_sha256'] or code[8 + 96] != 14:
+                raise ValueError('26.2 main depth clear-zero bytecode drift')
+            evidence.append('GameRenderer.render:verified-main-depth-clear-zero-bytecode')
             for owner, expected in profile['game_api'].items():
                 _, declared, _ = methods(game.read(owner + '.class'))
                 actual = {(name, desc) for name, desc, _, _ in declared}
@@ -279,6 +310,8 @@ def build(profile, dependencies):
     classpath = [dependencies['mixin'], dependencies[profile['loader'] + '-loader' if profile['loader'] != 'forge' else 'forge-javafml']]
     if profile['loader'] == 'neoforge':
         classpath.append(dependencies['neoforge-api'])
+    if profile['depth_resource'] == 'gpu_texture':
+        classpath.append(dependencies['minecraft-26.2'])
     if profile['scene_scaling']:
         # Use actual class bytes without Oculus's stale manifest Class-Path. Only
         # compile-time API dependencies are copied; none enter the adapter JAR.

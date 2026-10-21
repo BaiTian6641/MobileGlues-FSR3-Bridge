@@ -17,6 +17,7 @@ using BridgeModeFn = void (*)(JNIEnv*, jclass);
 using TraceFn = jstring (*)(JNIEnv*, jclass, jint, jint, jint, jint);
 using FinalScopeFn = void (*)(JNIEnv*, jclass, jboolean);
 using SceneDepthFn = void (*)(JNIEnv*, jclass, jint);
+using DepthConventionFn = jboolean (*)(JNIEnv*, jclass, jint);
 AvailableFn g_available = nullptr;
 SubmitFn g_submit = nullptr;
 ScaleFn g_scale = nullptr;
@@ -27,6 +28,7 @@ BridgeModeFn g_bridge_mode = nullptr;
 TraceFn g_trace = nullptr;
 FinalScopeFn g_final_scope = nullptr;
 SceneDepthFn g_scene_depth = nullptr;
+DepthConventionFn g_depth_convention = nullptr;
 } // namespace
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -58,6 +60,8 @@ Java_com_googlebook_fsrbridge_NativeBridge_init(JNIEnv* env, jclass, jstring pat
         dlsym(candidate, "Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeFinalScope"));
     auto next_scene_depth = reinterpret_cast<SceneDepthFn>(
         dlsym(candidate, "Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeSetSceneDepth"));
+    auto next_depth_convention = reinterpret_cast<DepthConventionFn>(
+        dlsym(candidate, "Java_com_googlebook_fsrbridge_Fsr3Bridge_nativeDepthConvention"));
     if (!(next_available && next_submit && next_scale && next_viewport && next_camera
             && next_camera_invalid && next_bridge_mode && next_final_scope && next_scene_depth)) {
         dlclose(candidate);
@@ -73,8 +77,21 @@ Java_com_googlebook_fsrbridge_NativeBridge_init(JNIEnv* env, jclass, jstring pat
     g_trace = next_trace; // Diagnostics are optional; rendering entry points above are mandatory.
     g_final_scope = next_final_scope;
     g_scene_depth = next_scene_depth;
+    g_depth_convention = next_depth_convention;
     g_core = candidate;
     return JNI_TRUE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_googlebook_fsrbridge_NativeBridge_depthConvention(JNIEnv* env, jclass, jint flags) {
+    if (!g_core || (flags != 0 && flags != 1)) return JNI_FALSE;
+    // Older cores implement only the legacy forward-depth contract.
+    if (!g_depth_convention) return flags == 0 ? JNI_TRUE : JNI_FALSE;
+    jclass target = env->FindClass("com/googlebook/fsrbridge/Fsr3Bridge");
+    if (!target) return JNI_FALSE;
+    jboolean result = g_depth_convention(env, target, flags);
+    env->DeleteLocalRef(target);
+    return result;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
