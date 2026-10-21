@@ -48,14 +48,24 @@ public final class AdapterProfile {
         return depthConvention() == 1 ? 0.0d : 1.0d;
     }
 
+    /** The gpu-texture family owns Mojang GpuTexture depth and render-pass output binding. */
+    public static boolean usesGpuTextureDepth() {
+        return "gpu_texture".equals(value("depth_resource"));
+    }
+
     /** 26.2 render-pass closure does not retain the main framebuffer binding. */
     public static MainSubmissionTarget bindSubmissionTarget(Object colorHolder) throws ReflectiveOperationException {
-        if (!value("minecraft").equals("26.2")) return MainSubmissionTarget.unchanged();
+        if (!usesGpuTextureDepth()) return MainSubmissionTarget.unchanged();
         Class<?> minecraft = Class.forName("net.minecraft.client.Minecraft");
         Object client = minecraft.getMethod("getInstance").invoke(null);
         Object renderer = minecraft.getField("gameRenderer").get(client);
-        Object target = Class.forName("net.minecraft.client.renderer.GameRenderer")
-                .getMethod("mainRenderTarget").invoke(renderer);
+        Object target;
+        try {
+            target = Class.forName("net.minecraft.client.renderer.GameRenderer")
+                    .getMethod("mainRenderTarget").invoke(renderer);
+        } catch (NoSuchMethodException olderAccessor) {
+            target = minecraft.getMethod("getMainRenderTarget").invoke(client);
+        }
         Class<?> renderTarget = Class.forName("com.mojang.blaze3d.pipeline.RenderTarget");
         Object color = renderTarget.getMethod("getColorTexture").invoke(target);
         Class<?> texture = Class.forName("com.mojang.blaze3d.textures.GpuTexture");
@@ -102,13 +112,21 @@ public final class AdapterProfile {
         if (sourceGpu != null) {
             // Mirror the pinned 26.2 Iris allocation API while retaining the source's actual format and usage.
             Class<?> texture = Class.forName("com.mojang.blaze3d.textures.GpuTexture");
-            Class<?> gpuFormat = Class.forName("com.mojang.blaze3d.GpuFormat");
             Object sourceFormat = texture.getMethod("getFormat").invoke(sourceGpu);
             int usage = gpuUsage(sourceGpu);
             Object device = Class.forName("com.mojang.blaze3d.systems.RenderSystem").getMethod("getDevice").invoke(null);
-            return Class.forName("com.mojang.blaze3d.systems.GpuDevice")
-                    .getMethod("createTexture", String.class, int.class, gpuFormat, int.class, int.class, int.class, int.class)
-                    .invoke(device, "MobileGlues scene depth", usage, sourceFormat, width, height, 1, 1);
+            Class<?> deviceClass = Class.forName("com.mojang.blaze3d.systems.GpuDevice");
+            Method create = null;
+            for (Method candidate : deviceClass.getMethods()) {
+                Class<?>[] types = candidate.getParameterTypes();
+                if (candidate.getName().equals("createTexture") && types.length == 7 &&
+                        types[0] == String.class && types[2].isInstance(sourceFormat)) {
+                    create = candidate;
+                    break;
+                }
+            }
+            if (create == null) throw new IllegalStateException("GpuDevice.createTexture API changed");
+            return create.invoke(device, "MobileGlues scene depth", usage, sourceFormat, width, height, 1, 1);
         }
         Class<?> depthFormat = Class.forName(irisClass("gl.texture.DepthBufferFormat"));
         Object value = depthFormat.getMethod("fromGlEnum", int.class).invoke(null, format);
@@ -127,7 +145,7 @@ public final class AdapterProfile {
 
     public static int textureId(Object depth) {
         try {
-            if (value("minecraft").equals("26.2")) {
+            if (usesGpuTextureDepth()) {
                 Class<?> glTexture = Class.forName("com.mojang.blaze3d.opengl.GlTexture");
                 if (!glTexture.isInstance(depth)) throw new IllegalArgumentException("FSR3 bridge requires the OpenGL backend");
                 return (Integer) glTexture.getMethod("glId").invoke(depth);
@@ -139,7 +157,7 @@ public final class AdapterProfile {
     }
 
     public static void destroyDepth(Object depth) throws ReflectiveOperationException {
-        if (value("minecraft").equals("26.2")) {
+        if (usesGpuTextureDepth()) {
             Class.forName("com.mojang.blaze3d.textures.GpuTexture").getMethod("close").invoke(depth);
         } else {
             depth.getClass().getMethod("destroy").invoke(depth);
