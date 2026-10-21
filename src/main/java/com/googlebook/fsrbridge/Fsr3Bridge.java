@@ -133,6 +133,7 @@ public final class Fsr3Bridge {
      */
     private static volatile boolean inFinalPass;
     private static volatile boolean packHasFinalPass = true;
+    private static FinalViewportUniforms finalViewportUniforms;
 
     /**
      * Iris' no-final path copies colortex0 into the native main target with
@@ -144,8 +145,18 @@ public final class Fsr3Bridge {
         mark("pack has final pass=" + hasFinalPass);
     }
 
-    public static void beginFinalPass() { inFinalPass = true; }
-    public static void endFinalPass() { inFinalPass = false; }
+    public static void beginFinalPass(FinalViewportUniforms uniforms) {
+        inFinalPass = true;
+        finalViewportUniforms = uniforms;
+        uniforms.mgfsr3$refreshViewportUniforms();
+    }
+
+    public static void endFinalPass() {
+        inFinalPass = false;
+        FinalViewportUniforms uniforms = finalViewportUniforms;
+        finalViewportUniforms = null;
+        if (uniforms != null) uniforms.mgfsr3$refreshViewportUniforms();
+    }
 
     /** Recover a final-pass scope if Iris aborted a previous frame before its return injection. */
     public static void resetFinalPassScope() {
@@ -155,7 +166,7 @@ public final class Fsr3Bridge {
                 NativeBridge.setSceneDepth(0);
             }
         } finally {
-            inFinalPass = false;
+            endFinalPass();
         }
     }
 
@@ -416,26 +427,37 @@ public final class Fsr3Bridge {
 
     /** Called on the render thread immediately after Iris' final pass. */
     private static boolean submitLogged;
-    private static int previousSubmitCode = Integer.MIN_VALUE;
+    private static String previousSubmitFailure;
     private static long nextSubmitWarning;
 
-    public static void submit() {
+    private static void reportSubmitFailure(String failure) {
+        long now = System.nanoTime();
+        if (!failure.equals(previousSubmitFailure) || now >= nextSubmitWarning) {
+            mark(failure + "; repeated failures limited to one report per 30 seconds");
+            nextSubmitWarning = now + 30_000_000_000L;
+        }
+        previousSubmitFailure = failure;
+    }
+
+    public static void submit(Object finalColorFramebuffer) {
         if (!LOADED) return;
         try {
-            int rc = NativeBridge.submit();
-            if (rc == 0 && !submitLogged) {
-                submitLogged = true;
-                mark("FSR3 submit success");
-            } else if (rc != 0) {
-                long now = System.nanoTime();
-                if (rc != previousSubmitCode || now >= nextSubmitWarning) {
-                    mark("submit rc=" + rc + "; repeated failures limited to one report per 30 seconds");
-                    nextSubmitWarning = now + 30_000_000_000L;
-                }
+            int rc;
+            MainSubmissionTarget target = AdapterProfile.bindSubmissionTarget(finalColorFramebuffer);
+            try (target) {
+                rc = NativeBridge.submit();
             }
-            previousSubmitCode = rc;
+            if (rc == 0) {
+                previousSubmitFailure = null;
+                if (!submitLogged) {
+                    submitLogged = true;
+                    mark("FSR3 submit success");
+                }
+            } else {
+                reportSubmitFailure("submit rc=" + rc);
+            }
         } catch (Exception | LinkageError t) {
-            warn("nativeSubmit failed: " + t);
+            reportSubmitFailure("nativeSubmit failed: " + t);
         }
     }
 }

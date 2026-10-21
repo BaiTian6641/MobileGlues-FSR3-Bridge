@@ -1,0 +1,50 @@
+package com.googlebook.fsrbridge;
+
+import java.util.Set;
+import kroppeb.stareval.element.ExpressionElement;
+import kroppeb.stareval.element.token.IdToken;
+import kroppeb.stareval.element.token.NumberToken;
+import kroppeb.stareval.element.tree.AccessExpressionElement;
+import kroppeb.stareval.element.tree.BinaryExpressionElement;
+import kroppeb.stareval.element.tree.FunctionCall;
+import kroppeb.stareval.element.tree.UnaryExpressionElement;
+
+/** A conservative allowlist for reevaluation; unknown nodes retain their frame value. */
+public final class UniformExpressionPolicy {
+    private static final Set<String> PURE_FUNCTIONS = Set.of(
+            "abs", "acos", "asin", "atan", "atan2", "ceil", "clamp", "cos", "cross",
+            "degrees", "distance", "dot", "exp", "exp2", "floor", "fract", "if",
+            "inversesqrt", "length", "log", "log2", "max", "min", "mix", "mod",
+            "normalize", "pow", "radians", "round", "sign", "sin", "smoothstep", "sqrt",
+            "step", "tan", "trunc", "bool", "int", "float",
+            "vec2", "vec3", "vec4", "ivec2", "ivec3", "ivec4", "bvec2", "bvec3", "bvec4");
+
+    private UniformExpressionPolicy() {}
+
+    public static boolean isPure(ExpressionElement expression) {
+        return isPure(expression, 0, new int[] {256});
+    }
+
+    private static boolean isPure(ExpressionElement expression, int depth, int[] remaining) {
+        if (expression == null || depth > 64 || --remaining[0] < 0) return false;
+        if (expression instanceof IdToken || expression instanceof NumberToken) return true;
+        if (expression instanceof FunctionCall call) {
+            if (!PURE_FUNCTIONS.contains(call.@AST_ID@())) return false;
+            for (ExpressionElement argument : call.@AST_ARGS@()) {
+                if (!isPure(argument, depth + 1, remaining)) return false;
+            }
+            return true;
+        }
+        if (expression instanceof BinaryExpressionElement binary) {
+            return isPure(binary.@AST_LEFT@(), depth + 1, remaining)
+                    && isPure(binary.@AST_RIGHT@(), depth + 1, remaining);
+        }
+        if (expression instanceof UnaryExpressionElement unary) {
+            return isPure(unary.@AST_INNER@(), depth + 1, remaining);
+        }
+        if (expression instanceof AccessExpressionElement access) {
+            return isPure(access.@AST_BASE@(), depth + 1, remaining);
+        }
+        return false;
+    }
+}

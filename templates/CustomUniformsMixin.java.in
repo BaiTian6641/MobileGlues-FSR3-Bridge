@@ -1,0 +1,67 @@
+package com.googlebook.fsrbridge.mixin;
+
+import com.googlebook.fsrbridge.FinalViewportUniforms;
+import com.googlebook.fsrbridge.Fsr3Bridge;
+import com.googlebook.fsrbridge.UniformExpressionPolicy;
+import com.googlebook.fsrbridge.ViewportUniformPlan;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import @CACHED_UNIFORM_CLASS@;
+import @CUSTOM_INPUT_CLASS@;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/** Changes coordinate-derived values without advancing unrelated frame state twice. */
+@Mixin(targets = "@CUSTOM_UNIFORMS_CLASS@", remap = false)
+public abstract class CustomUniformsMixin implements FinalViewportUniforms {
+    @Shadow @Final private List<CachedUniform> uniformOrder;
+    @Shadow @Final private Map<CachedUniform, List<CachedUniform>> dependsOn;
+    @Unique private Set<String> mgfsr3$pureExpressions;
+    @Unique private List<CachedUniform> mgfsr3$viewportUniforms;
+    @Unique private boolean mgfsr3$reportedSkipped;
+
+    @Inject(method = "<init>@CUSTOM_CONSTRUCTOR@", at = @At("RETURN"), require = 1)
+    private void mgfsr3$definitions(CustomUniformFixedInputUniformsHolder inputs,
+                                   Map<String, ?> definitions, CallbackInfo callback) {
+        mgfsr3$pureExpressions = new HashSet<>();
+        for (Map.Entry<String, ?> entry : definitions.entrySet()) {
+            if (entry.getValue() instanceof CustomUniformDefinitionAccessor definition
+                    && UniformExpressionPolicy.isPure(definition.mgfsr3$expression())) {
+                mgfsr3$pureExpressions.add(entry.getKey());
+            }
+        }
+    }
+
+    @Inject(method = "optimise()V", at = @At("RETURN"), require = 1)
+    private void mgfsr3$invalidatePlan(CallbackInfo callback) {
+        mgfsr3$viewportUniforms = null;
+    }
+
+    @Override
+    public void mgfsr3$refreshViewportUniforms() {
+        // Build lazily: Iris removes unused nodes in optimise() after construction.
+        if (mgfsr3$viewportUniforms == null) {
+            mgfsr3$viewportUniforms = ViewportUniformPlan.create(uniformOrder, dependsOn,
+                    CachedUniform::getName, mgfsr3$pureExpressions::contains);
+            if (!mgfsr3$reportedSkipped) {
+                int skipped = 0;
+                for (CachedUniform uniform : uniformOrder) {
+                    List<CachedUniform> inputs = dependsOn.get(uniform);
+                    if (!mgfsr3$pureExpressions.contains(uniform.getName()) && inputs != null
+                            && inputs.stream().anyMatch(mgfsr3$viewportUniforms::contains)) skipped++;
+                }
+                if (skipped > 0) Fsr3Bridge.mark("Final viewport refresh preserves " + skipped
+                        + " stateful or unsupported expressions at their scene-frame values");
+                mgfsr3$reportedSkipped = true;
+            }
+        }
+        for (CachedUniform uniform : mgfsr3$viewportUniforms) uniform.update();
+    }
+}

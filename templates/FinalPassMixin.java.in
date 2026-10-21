@@ -2,8 +2,13 @@ package com.googlebook.fsrbridge.mixin;
 
 import com.googlebook.fsrbridge.DiagnosticTrace;
 import com.googlebook.fsrbridge.Fsr3Bridge;
+import com.googlebook.fsrbridge.FinalViewportUniforms;
 import com.googlebook.fsrbridge.NativeBridge;
+import @CUSTOM_UNIFORMS_CLASS@;
+import @FRAMEBUFFER_CLASS@;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Executes the bridge after the pinned Iris final pass, before vanilla HUD composition. */
 @Mixin(targets = "@FINAL_CLASS@", remap = false)
 public abstract class FinalPassMixin {
+    @Shadow @Final private CustomUniforms customUniforms;
+    @Shadow @Final private GlFramebuffer colorHolder;
     @Unique private boolean mgfsr3$entered;
 
     @Inject(method = "renderFinalPass()V", at = @At("HEAD"), require = 1)
@@ -19,7 +26,9 @@ public abstract class FinalPassMixin {
         mgfsr3$entered = Fsr3Bridge.available();
         if (!mgfsr3$entered) return;
         DiagnosticTrace.startRole("FINAL_DRAW", true);
-        Fsr3Bridge.beginFinalPass();
+        // The final pass uses native coordinates; derived custom uniforms were
+        // previously cached with the scene extent at beginLevelRendering.
+        Fsr3Bridge.beginFinalPass((FinalViewportUniforms) customUniforms);
         NativeBridge.finalScope(true);
         NativeBridge.setSceneDepth(Fsr3Bridge.sceneDepthTextureId());
         Fsr3Bridge.captureCamera();
@@ -32,12 +41,12 @@ public abstract class FinalPassMixin {
         if (!mgfsr3$entered) return;
         try {
             DiagnosticTrace.endRole("FINAL_DRAW_RETURN", null);
-            Fsr3Bridge.submit();
+            Fsr3Bridge.submit(colorHolder);
         } finally {
             NativeBridge.finalScope(false);
             NativeBridge.setSceneDepth(0);
-            Fsr3Bridge.endFinalPass();
             mgfsr3$entered = false;
+            Fsr3Bridge.endFinalPass();
         }
     }
 }

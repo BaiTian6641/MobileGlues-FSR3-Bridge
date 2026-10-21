@@ -1,0 +1,88 @@
+package com.googlebook.fsrbridge;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import kroppeb.stareval.function.FunctionReturn;
+import kroppeb.stareval.parser.Parser;
+import @NAMESPACE@.gl.uniform.UniformUpdateFrequency;
+import @NAMESPACE@.parsing.IrisOptions;
+import @NAMESPACE@.uniforms.custom.cached.CachedUniform;
+import @NAMESPACE@.uniforms.custom.cached.FloatCachedUniform;
+
+/** Uses the actual pinned parser and cached uniforms, without a game or GL context. */
+public final class ViewportUniformContractTest {
+    private static float value(CachedUniform uniform) {
+        FunctionReturn result = new FunctionReturn();
+        uniform.writeTo(result);
+        return result.floatReturn;
+    }
+
+    private static void check(boolean condition, String message) {
+        if (!condition) throw new AssertionError(message);
+    }
+
+    public static void main(String[] args) throws Exception {
+        for (String expression : List.of("vec2(1 / viewWidth, 1 / viewHeight)",
+                "clamp(-viewWidth / max(viewHeight, 1), 0, 1)", "windowToScreen.x")) {
+            check(UniformExpressionPolicy.isPure(Parser.parse(expression, IrisOptions.options)),
+                    "pure viewport expression rejected: " + expression);
+        }
+        for (String expression : List.of("smooth(viewWidth)", "viewWidth + random()",
+                "vec2(1 / viewWidth, smooth(viewHeight))", "randomInt(0, viewWidth)",
+                "futureFunction(viewWidth)")) {
+            check(!UniformExpressionPolicy.isPure(Parser.parse(expression, IrisOptions.options)),
+                    "stateful or unknown expression accepted: " + expression);
+        }
+        check(!UniformExpressionPolicy.isPure(null), "unknown AST must retain its cached value");
+        String deep = "sin(".repeat(70) + "viewWidth" + ")".repeat(70);
+        check(!UniformExpressionPolicy.isPure(Parser.parse(deep, IrisOptions.options)),
+                "deep expressions must use the bounded fallback");
+
+        float[] extent = {1440};
+        int[] evaluations = {0, 0, 0};
+        FloatCachedUniform width = new FloatCachedUniform("viewWidth", UniformUpdateFrequency.PER_FRAME,
+                () -> extent[0]);
+        FloatCachedUniform inverse = new FloatCachedUniform("inverseWidth", UniformUpdateFrequency.CUSTOM,
+                () -> 1 / value(width));
+        FloatCachedUniform nested = new FloatCachedUniform("nested", UniformUpdateFrequency.CUSTOM,
+                () -> value(inverse) * 2);
+        FloatCachedUniform diamond = new FloatCachedUniform("diamond", UniformUpdateFrequency.CUSTOM,
+                () -> { evaluations[2]++; return value(inverse) + value(nested); });
+        FloatCachedUniform stateful = new FloatCachedUniform("stateful", UniformUpdateFrequency.CUSTOM,
+                () -> ++evaluations[0] + value(width));
+        FloatCachedUniform dependent = new FloatCachedUniform("dependent", UniformUpdateFrequency.CUSTOM,
+                () -> value(stateful) + value(width));
+        FloatCachedUniform onlyStateful = new FloatCachedUniform("onlyStateful", UniformUpdateFrequency.CUSTOM,
+                () -> value(stateful) * 2);
+        FloatCachedUniform unrelated = new FloatCachedUniform("unrelated", UniformUpdateFrequency.CUSTOM,
+                () -> ++evaluations[1]);
+        List<CachedUniform> order = List.of(width, inverse, nested, diamond, stateful, dependent, onlyStateful, unrelated);
+        Map<CachedUniform, List<CachedUniform>> dependencies = Map.of(inverse, List.of(width),
+                nested, List.of(inverse), diamond, List.of(inverse, nested),
+                stateful, List.of(width), dependent, List.of(stateful, width),
+                onlyStateful, List.of(stateful));
+        Set<String> pure = Set.of("inverseWidth", "nested", "diamond", "dependent", "onlyStateful");
+        order.forEach(CachedUniform::update);
+        float priorStateful = value(stateful);
+        float priorOnlyStateful = value(onlyStateful);
+        List<CachedUniform> plan = ViewportUniformPlan.create(order, dependencies, CachedUniform::getName,
+                pure::contains);
+        check(plan.equals(List.of(width, inverse, nested, diamond, dependent)), "dependency closure or evaluation order");
+
+        extent[0] = 2880;
+        check(value(inverse) == 1f / 1440, "actual Iris cache must reproduce the stale final coordinate");
+        plan.forEach(CachedUniform::update);
+        check(value(inverse) == 1f / 2880 && value(nested) == 2f / 2880, "native viewport dependency refresh");
+        check(value(diamond) == value(inverse) + value(nested) && evaluations[2] == 2,
+                "shared dependencies must update once in topological order");
+        check(value(dependent) == priorStateful + 2880, "pure expression may consume preserved stateful input");
+        check(value(stateful) == priorStateful && value(onlyStateful) == priorOnlyStateful,
+                "stateful node and unchanged descendants must preserve frame values");
+        check(evaluations[0] == 1 && evaluations[1] == 1, "refresh must not advance frame state twice");
+        extent[0] = 1440;
+        plan.forEach(CachedUniform::update);
+        check(value(inverse) == 1f / 1440 && evaluations[0] == 1, "scene cache restoration");
+        System.out.println("PASS actual shader parser and CachedUniform viewport contracts @PROFILE@");
+    }
+}

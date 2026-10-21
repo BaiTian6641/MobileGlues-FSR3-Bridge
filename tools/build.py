@@ -77,6 +77,9 @@ def verify_hooks(profile, artifact):
         'CameraUniforms': ['getUnshiftedCameraPosition'],
         'HandRenderer': ['renderSolid', 'renderTranslucent'],
         'ShadowRenderer': ['renderShadows'], 'CompositeRenderer': ['renderAll'],
+        'CustomUniforms': ['<init>', 'optimise'],
+        'CachedUniform': ['getName', 'update'],
+        'GlFramebuffer': ['getId'],
     }
     evidence = []
     with zipfile.ZipFile(artifact) as jar:
@@ -89,6 +92,22 @@ def verify_hooks(profile, artifact):
                 if (name, desc) not in actual:
                     raise ValueError('missing exact hook: ' + class_name + '.' + name + desc)
                 evidence.append(class_name + '.' + name + desc)
+        for owner, names in profile['viewport_expression_methods'].items():
+            class_name = profile['classes'][owner].replace('.', '/')
+            _, entries, _ = methods(jar.read(class_name + '.class'))
+            actual = {(name, desc) for name, desc, _, _ in entries}
+            for name, desc in names.items():
+                if (name, desc) not in actual:
+                    raise ValueError('missing expression API: ' + class_name + '.' + name + desc)
+                evidence.append(class_name + '.' + name + desc)
+        for owner, names in profile['viewport_fields'].items():
+            class_name = profile['classes'][owner].replace('.', '/')
+            _, _, _, fields = methods(jar.read(class_name + '.class'), include_fields=True)
+            actual = {(name, desc) for name, desc, access, _ in fields if access & 0x10}
+            for name, desc in names.items():
+                if (name, desc) not in actual:
+                    raise ValueError('missing final field: ' + class_name + '.' + name + ':' + desc)
+                evidence.append(class_name + '.' + name + ':' + desc)
         if profile['scene_scaling']:
             pipeline = profile['classes']['Pipeline'].replace('.', '/')
             _, pipeline_methods, _ = methods(jar.read(pipeline + '.class'))
@@ -110,7 +129,14 @@ def generate_sources(profile, folder):
         'PROGRAM_IMPORT': '',
         'TARGETS_CLASS': profile['classes']['RenderTargets'],
         'RESIZE_DESCRIPTOR': descriptor(profile, 'RenderTargets', 'resizeIfNeeded'),
+        'CUSTOM_UNIFORMS_CLASS': profile['classes']['CustomUniforms'],
+        'CUSTOM_DEFINITION_CLASS': profile['classes']['CustomUniformDefinition'],
+        'CUSTOM_INPUT_CLASS': profile['classes']['CustomUniformInputs'],
+        'CACHED_UNIFORM_CLASS': profile['classes']['CachedUniform'],
+        'CUSTOM_CONSTRUCTOR': descriptor(profile, 'CustomUniforms', '<init>'),
+        'FRAMEBUFFER_CLASS': profile['classes']['GlFramebuffer'],
     }
+    replacements.update({'AST_' + key.upper(): value for key, value in profile['viewport_ast_accessors'].items()})
     if profile['scene_scaling']:
         target = profile['classes']['RenderTargets'].replace('.', '/')
         args = {'TARGET_CONSTRUCTOR': 'L' + target + ';<init>' + descriptor(profile, 'RenderTargets', '<init>'),
@@ -119,8 +145,11 @@ def generate_sources(profile, folder):
         replacements['PROGRAM_IMPORT'] = 'import ' + profile['classes']['ProgramSet'] + ';'
     else:
         raise ValueError('profile has no scene allocation adapter')
-    for name in ['FinalPassMixin', 'PipelineMixin', 'ViewportMixin', 'RenderTargetsTraceMixin']:
+    for name in ['FinalPassMixin', 'PipelineMixin', 'ViewportMixin', 'RenderTargetsTraceMixin',
+                 'CustomUniformsMixin', 'CustomUniformDefinitionAccessor']:
         (sources / (name + '.java')).write_text(template(name, replacements))
+    (folder / 'generated/com/googlebook/fsrbridge/UniformExpressionPolicy.java').write_text(
+        template('UniformExpressionPolicy', replacements))
     # Keep trace hooks on stable Iris/Oculus class names; no brittle GUI target across versions.
     for owner, names in [('HandRenderer', ['renderSolid', 'renderTranslucent']),
                          ('ShadowRenderer', ['renderShadows']), ('CompositeRenderer', ['renderAll'])]:
@@ -155,7 +184,8 @@ def resources(profile, classes):
         (classes / 'pack.mcmeta').write_text(json.dumps(pack, indent=2) + '\n')
     mixins = {'required': True, 'minVersion': '0.8', 'package': 'com.googlebook.fsrbridge.mixin',
               'compatibilityLevel': 'JAVA_17', 'client': ['FinalPassMixin', 'PipelineMixin', 'ViewportMixin',
-                  'HandRendererTraceMixin', 'ShadowRendererTraceMixin', 'CompositeRendererTraceMixin', 'RenderTargetsTraceMixin'],
+                  'HandRendererTraceMixin', 'ShadowRendererTraceMixin', 'CompositeRendererTraceMixin', 'RenderTargetsTraceMixin',
+                  'CustomUniformsMixin', 'CustomUniformDefinitionAccessor'],
               'injectors': {'defaultRequire': 1}}
     (classes / 'mixins.mgfsrbridge.json').write_text(json.dumps(mixins, indent=2) + '\n')
     props = {key: profile[key] for key in ['id', 'minecraft', 'namespace', 'scene_scaling', 'matrix_store', 'camera_fields']}
@@ -233,6 +263,13 @@ def build(profile, dependencies):
                     if (name, desc) not in actual:
                         raise ValueError('Minecraft 26.2 GPU API drift: ' + owner + '.' + name)
                     evidence.append(owner + '.' + name + desc)
+            for owner, expected in profile['game_fields'].items():
+                _, _, _, fields = methods(game.read(owner + '.class'), include_fields=True)
+                actual = {(name, desc) for name, desc, access, _ in fields if access & 0x1}
+                for name, desc in expected.items():
+                    if (name, desc) not in actual:
+                        raise ValueError('Minecraft 26.2 GPU field drift: ' + owner + '.' + name)
+                    evidence.append(owner + '.' + name + ':' + desc)
     folder = ROOT / 'build' / profile['id']
     if folder.exists():
         shutil.rmtree(folder)
@@ -243,12 +280,15 @@ def build(profile, dependencies):
     if profile['loader'] == 'neoforge':
         classpath.append(dependencies['neoforge-api'])
     if profile['scene_scaling']:
-        # Oculus embeds a stale manifest Class-Path. javac needs only the real ProgramSet
-        # class, so a compile-only view avoids following unpinned manifest dependencies.
+        # Use actual class bytes without Oculus's stale manifest Class-Path. Only
+        # compile-time API dependencies are copied; none enter the adapter JAR.
         compile_api = folder / 'shader-api.jar'
-        member = profile['classes']['ProgramSet'].replace('.', '/') + '.class'
+        owners = ['ProgramSet', 'CustomUniforms', 'CustomUniformInputs', 'CachedUniform', 'GlFramebuffer', 'GlResource']
+        members = {profile['classes'][owner].replace('.', '/') + '.class' for owner in owners}
         with zipfile.ZipFile(artifact) as source, zipfile.ZipFile(compile_api, 'w') as view:
-            view.writestr(member, source.read(member))
+            members.update(name for name in source.namelist() if name.startswith('kroppeb/stareval/') and name.endswith('.class'))
+            for member in sorted(members):
+                view.writestr(member, source.read(member))
         classpath.append(compile_api)
     run(os.environ.get('JAVAC', 'javac'), '--release', '17', '-Xlint:all', '-Werror', '-proc:none', '-cp', os.pathsep.join(map(str, classpath)),
         '-d', classes, *sorted((ROOT / 'src/main/java').rglob('*.java')), *generated)

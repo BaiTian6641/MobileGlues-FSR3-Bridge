@@ -1,0 +1,12 @@
+package com.googlebook.fsrbridge.mixin;
+
+import kroppeb.stareval.element.ExpressionElement;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
+/** Reads the parsed definition before the shader mod discards its original syntax tree. */
+@Mixin(targets = "@CUSTOM_DEFINITION_CLASS@", remap = false)
+public interface CustomUniformDefinitionAccessor {
+    @Accessor("expression")
+    ExpressionElement mgfsr3$expression();
+}

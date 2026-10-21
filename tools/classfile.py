@@ -2,8 +2,8 @@
 import struct
 
 
-def methods(data):
-    """Return (internal class name, methods, member references) from a JVM class."""
+def methods(data, include_fields=False):
+    """Return class name, methods and references; optionally append declared fields."""
     offset = 0
 
     def number(fmt):
@@ -62,7 +62,7 @@ def methods(data):
             result.append((name, descriptor, access, attributes))
         return result
 
-    members()
+    fields = members()
     result = members()
     refs = []
     refs_by_index = {}
@@ -76,6 +76,8 @@ def methods(data):
     for _, _, _, attributes in result:
         if "Code" in attributes:
             attributes["_invocations"] = code_invocations(attributes["Code"], refs_by_index)
+    if include_fields:
+        return class_name, result, refs, fields
     return class_name, result, refs
 
 

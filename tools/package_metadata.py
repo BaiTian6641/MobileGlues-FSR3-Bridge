@@ -16,6 +16,7 @@ MIXIN_CONFIG = 'mixins.mgfsrbridge.json'
 MIXIN_CLASSES = {
     'FinalPassMixin', 'PipelineMixin', 'ViewportMixin', 'HandRendererTraceMixin',
     'ShadowRendererTraceMixin', 'CompositeRendererTraceMixin', 'RenderTargetsTraceMixin',
+    'CustomUniformsMixin', 'CustomUniformDefinitionAccessor',
 }
 LOADER_FILES = {'fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml'}
 

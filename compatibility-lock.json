@@ -31,7 +31,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -119,6 +129,27 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "method_4932",
@@ -128,7 +159,10 @@
         "com/mojang/blaze3d/textures/GpuTexture": {
           "getFormat": "()Lcom/mojang/blaze3d/GpuFormat;",
           "usage": "()I",
-          "close": "()V"
+          "close": "()V",
+          "getWidth": "(I)I",
+          "getHeight": "(I)I",
+          "isClosed": "()Z"
         },
         "com/mojang/blaze3d/opengl/GlTexture": {
           "glId": "()I"
@@ -138,6 +172,61 @@
         },
         "com/mojang/blaze3d/systems/GpuDevice": {
           "createTexture": "(Ljava/lang/String;ILcom/mojang/blaze3d/GpuFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"
+        },
+        "net/minecraft/client/Minecraft": {
+          "getInstance": "()Lnet/minecraft/client/Minecraft;"
+        },
+        "net/minecraft/client/renderer/GameRenderer": {
+          "mainRenderTarget": "()Lcom/mojang/blaze3d/pipeline/RenderTarget;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "getColorTexture": "()Lcom/mojang/blaze3d/textures/GpuTexture;"
+        }
+      },
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      },
+      "game_fields": {
+        "net/minecraft/client/Minecraft": {
+          "gameRenderer": "Lnet/minecraft/client/renderer/GameRenderer;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "width": "I",
+          "height": "I"
         }
       }
     },
@@ -171,7 +260,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -259,6 +358,27 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "m_27650_",
@@ -268,7 +388,10 @@
         "com/mojang/blaze3d/textures/GpuTexture": {
           "getFormat": "()Lcom/mojang/blaze3d/GpuFormat;",
           "usage": "()I",
-          "close": "()V"
+          "close": "()V",
+          "getWidth": "(I)I",
+          "getHeight": "(I)I",
+          "isClosed": "()Z"
         },
         "com/mojang/blaze3d/opengl/GlTexture": {
           "glId": "()I"
@@ -278,6 +401,61 @@
         },
         "com/mojang/blaze3d/systems/GpuDevice": {
           "createTexture": "(Ljava/lang/String;ILcom/mojang/blaze3d/GpuFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"
+        },
+        "net/minecraft/client/Minecraft": {
+          "getInstance": "()Lnet/minecraft/client/Minecraft;"
+        },
+        "net/minecraft/client/renderer/GameRenderer": {
+          "mainRenderTarget": "()Lcom/mojang/blaze3d/pipeline/RenderTarget;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "getColorTexture": "()Lcom/mojang/blaze3d/textures/GpuTexture;"
+        }
+      },
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      },
+      "game_fields": {
+        "net/minecraft/client/Minecraft": {
+          "gameRenderer": "Lnet/minecraft/client/renderer/GameRenderer;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "width": "I",
+          "height": "I"
         }
       }
     },
@@ -311,7 +489,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -399,11 +587,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "method_4932",
       "camera_fields": "field_1352,field_1351,field_1350",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     },
     {
       "id": "1.21.1-neoforge",
@@ -428,7 +674,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -516,11 +772,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "m_27650_",
       "camera_fields": "x,y,z",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     },
     {
       "id": "1.20.1-fabric",
@@ -552,7 +866,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -640,11 +964,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "method_4932",
       "camera_fields": "field_1352,field_1351,field_1350",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "getId",
+        "args": "getArgs",
+        "left": "getLeft",
+        "right": "getRight",
+        "inner": "getInner",
+        "base": "getBase"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "getId": "()Ljava/lang/String;",
+          "getArgs": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "getLeft": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "getRight": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "getInner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     },
     {
       "id": "1.20.1-forge",
@@ -676,7 +1058,17 @@
         "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
         "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
         "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
-        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline"
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource"
       },
       "namespace": "net.irisshaders.iris",
       "scene_scaling": true,
@@ -764,11 +1156,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "m_27650_",
       "camera_fields": "f_82479_,f_82480_,f_82481_",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "getId",
+        "args": "getArgs",
+        "left": "getLeft",
+        "right": "getRight",
+        "inner": "getInner",
+        "base": "getBase"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "getId": "()Ljava/lang/String;",
+          "getArgs": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "getLeft": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "getRight": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "getInner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     },
     {
       "id": "1.18.2-fabric",
@@ -800,7 +1250,17 @@
         "HandRenderer": "net.coderbot.iris.pipeline.HandRenderer",
         "ShadowRenderer": "net.coderbot.iris.pipeline.ShadowRenderer",
         "CompositeRenderer": "net.coderbot.iris.postprocess.CompositeRenderer",
-        "Pipeline": "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline"
+        "Pipeline": "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline",
+        "CustomUniforms": "net.coderbot.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.coderbot.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.coderbot.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.coderbot.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.coderbot.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.coderbot.iris.gl.GlResource"
       },
       "namespace": "net.coderbot.iris",
       "scene_scaling": true,
@@ -888,11 +1348,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/coderbot/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "method_4932",
       "camera_fields": "field_1352,field_1351,field_1350",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/coderbot/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "getId",
+        "args": "getArgs",
+        "left": "getLeft",
+        "right": "getRight",
+        "inner": "getInner",
+        "base": "getBase"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "getId": "()Ljava/lang/String;",
+          "getArgs": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "getLeft": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "getRight": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "getInner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     },
     {
       "id": "1.18.2-forge",
@@ -924,7 +1442,17 @@
         "HandRenderer": "net.coderbot.iris.pipeline.HandRenderer",
         "ShadowRenderer": "net.coderbot.iris.pipeline.ShadowRenderer",
         "CompositeRenderer": "net.coderbot.iris.postprocess.CompositeRenderer",
-        "Pipeline": "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline"
+        "Pipeline": "net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline",
+        "CustomUniforms": "net.coderbot.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.coderbot.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.coderbot.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.coderbot.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.coderbot.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.coderbot.iris.gl.GlResource"
       },
       "namespace": "net.coderbot.iris",
       "scene_scaling": true,
@@ -1012,11 +1540,69 @@
           "renderAll": [
             "()V"
           ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/coderbot/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
         }
       },
       "matrix_store": "m_27650_",
       "camera_fields": "f_82479_,f_82480_,f_82481_",
-      "depth_resource": "gl_texture_id"
+      "depth_resource": "gl_texture_id",
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/coderbot/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/coderbot/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "getId",
+        "args": "getArgs",
+        "left": "getLeft",
+        "right": "getRight",
+        "inner": "getInner",
+        "base": "getBase"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "getId": "()Ljava/lang/String;",
+          "getArgs": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "getLeft": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "getRight": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "getInner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "getBase": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      }
     }
   ]
 }

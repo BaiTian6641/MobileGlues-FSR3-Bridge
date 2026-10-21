@@ -15,6 +15,7 @@ import zipfile
 
 from build import ROOT, VERSION, verify_hooks
 from package_metadata import MIXIN_CONFIG, verify_package_metadata
+from test_viewport_uniforms import check_viewport_uniforms
 
 
 def run(*args):
@@ -50,6 +51,15 @@ def check_metadata_regressions(profile, jar):
     reject_metadata_mutation(profile, entries,
                              {'com/googlebook/fsrbridge/mixin/FinalPassMixin.class': None}, 'missing Mixin class')
     cases = 4
+    for name in ('CustomUniformsMixin', 'CustomUniformDefinitionAccessor'):
+        altered = json.loads(entries[MIXIN_CONFIG])
+        altered['client'].remove(name)
+        reject_metadata_mutation(profile, entries, {MIXIN_CONFIG: json.dumps(altered)},
+                                 'unregistered viewport Mixin: ' + name)
+        reject_metadata_mutation(profile, entries,
+                                 {'com/googlebook/fsrbridge/mixin/' + name + '.class': None},
+                                 'missing viewport Mixin class: ' + name)
+        cases += 2
     mixin_text = entries[MIXIN_CONFIG].decode('utf-8')
     for text, label in [('{"required":false,' + mixin_text[1:], 'duplicate JSON field'),
                         ('{"unused":NaN,' + mixin_text[1:], 'nonstandard JSON constant')]:
@@ -145,7 +155,8 @@ def main():
         with zipfile.ZipFile(artifact) as jar:
             check_metadata_regressions(profile, jar)
             names = jar.namelist()
-            if any(name.startswith(('net/minecraft/', 'net/irisshaders/', 'net/coderbot/', 'org/lwjgl/')) for name in names):
+            if any(name.startswith(('net/minecraft/', 'net/irisshaders/', 'net/coderbot/',
+                                    'org/lwjgl/', 'kroppeb/', 'it/unimi/dsi/')) for name in names):
                 raise AssertionError('dependency or test fixture leaked into ' + artifact.name)
             for name in names:
                 if name.endswith('.class') and int.from_bytes(jar.read(name)[6:8], 'big') != 61:
@@ -156,6 +167,9 @@ def main():
                 if abi + '=' + hashlib.sha256(library).hexdigest() not in manifest:
                     raise AssertionError('native checksum mismatch')
         run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.BridgeContractTest')
+        run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.FinalViewportScopeTest')
+        run(java, '-cp', os.pathsep.join(map(str, [folder, artifact])), 'com.googlebook.fsrbridge.SubmissionTargetTest')
+        check_viewport_uniforms(profile, javac, java)
         altered = copy.deepcopy(profile)
         altered['methods']['FinalPassRenderer']['renderFinalPass'] = ['(I)V']
         try:

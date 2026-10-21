@@ -50,13 +50,14 @@ for each selected profile. The checks read the archive itself and require:
 
 - Exactly one descriptor for the intended loader, correct mod identity and
   version, and dependencies matching the pinned Minecraft and shader-mod tuple.
-- The packaged loader entrypoint and all seven client Mixin classes, valid
+- The packaged loader entrypoint and all nine client Mixin classes, valid
   loader/manifest registration, and required injection checks.
 - Valid root JSON and version-correct pack formats for both Forge profiles.
 - Synthetic metadata policy for the code-only Fabric and NeoForge profiles.
 
 In-memory copies of each JAR test missing/malformed loader descriptors, a wrong
-shader dependency, disabled required Mixins and missing Mixin classes. They also reject duplicate JSON/TOML fields, nonstandard JSON constants,
+shader dependency, disabled required Mixins and missing or unregistered viewport
+Mixins. They also reject duplicate JSON/TOML fields, nonstandard JSON constants,
 incorrect scalar types, and malformed or ambiguous manifest sections. Forge
 copies additionally test absent/malformed pack metadata, a missing pack section,
 an empty description, and wrong numeric or string pack formats. The 1.18.2 tests

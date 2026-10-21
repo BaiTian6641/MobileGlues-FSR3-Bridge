@@ -40,6 +40,32 @@ public final class AdapterProfile {
         return Boolean.parseBoolean(value("scene_scaling"));
     }
 
+    /** 26.2 render-pass closure does not retain the main framebuffer binding. */
+    public static MainSubmissionTarget bindSubmissionTarget(Object colorHolder) throws ReflectiveOperationException {
+        if (!value("minecraft").equals("26.2")) return MainSubmissionTarget.unchanged();
+        Class<?> minecraft = Class.forName("net.minecraft.client.Minecraft");
+        Object client = minecraft.getMethod("getInstance").invoke(null);
+        Object renderer = minecraft.getField("gameRenderer").get(client);
+        Object target = Class.forName("net.minecraft.client.renderer.GameRenderer")
+                .getMethod("mainRenderTarget").invoke(renderer);
+        Class<?> renderTarget = Class.forName("com.mojang.blaze3d.pipeline.RenderTarget");
+        Object color = renderTarget.getMethod("getColorTexture").invoke(target);
+        Class<?> texture = Class.forName("com.mojang.blaze3d.textures.GpuTexture");
+        if (color == null || (Boolean) texture.getMethod("isClosed").invoke(color)) {
+            throw new IllegalStateException("main output color texture is unavailable");
+        }
+        int width = renderTarget.getField("width").getInt(target);
+        int height = renderTarget.getField("height").getInt(target);
+        int colorWidth = (Integer) texture.getMethod("getWidth", int.class).invoke(color, 0);
+        int colorHeight = (Integer) texture.getMethod("getHeight", int.class).invoke(color, 0);
+        if (width <= 0 || height <= 0 || width != colorWidth || height != colorHeight) {
+            throw new IllegalStateException("main output extent differs from its color texture");
+        }
+        Class<?> framebuffer = Class.forName(irisClass("gl.framebuffer.GlFramebuffer"));
+        int outputFbo = (Integer) framebuffer.getMethod("getId").invoke(colorHolder);
+        return MainSubmissionTarget.bind(outputFbo, textureId(color), width, height);
+    }
+
     public static void initialize() {
         // Deliberately avoid loading JNI here: loader entrypoints run before the GL context exists.
         System.err.println("[mgfsr3bridge] adapter=" + value("id") + "; GPU qualification pending");
