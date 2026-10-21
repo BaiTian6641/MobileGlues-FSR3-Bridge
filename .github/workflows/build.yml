@@ -36,10 +36,21 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
-        with:
-          distribution: temurin
-          java-version: '25.0.4.1+1'
+      - name: Install checksum-pinned Temurin JDK 25
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/temurin-25.0.4.1+1.tar.gz"
+          toolchain="$RUNNER_TEMP/temurin-25.0.4.1+1"
+          curl --fail --location --proto '=https' --retry 3 \
+            --output "$archive" \
+            'https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.4.1%2B1/OpenJDK25U-jdk_x64_linux_hotspot_25.0.4.1_1.tar.gz'
+          printf '%s  %s\n' 'dbb698396d478e7fa2b1e50f4103324b2a99b90569ee27c33f2261f9215cf41e' "$archive" | sha256sum --check --strict -
+          mkdir -p "$toolchain"
+          tar --extract --gzip --file "$archive" --directory "$toolchain" --strip-components=1 --no-same-owner
+          printf 'JAVA_HOME=%s\n' "$toolchain" >> "$GITHUB_ENV"
+          printf '%s/bin\n' "$toolchain" >> "$GITHUB_PATH"
+          "$toolchain/bin/java" -version
+          "$toolchain/bin/javac" -version
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
