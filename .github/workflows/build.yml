@@ -1,0 +1,68 @@
+name: Verify and build bridge JARs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bridge-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jars:
+    name: ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - 26.2-fabric
+          - 26.2-neoforge
+          - 1.21.1-fabric
+          - 1.21.1-neoforge
+          - 1.20.1-fabric
+          - 1.20.1-forge
+          - 1.18.2-fabric
+          - 1.18.2-forge
+    env:
+      ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/28.2.13676358
+      SOURCE_DATE_EPOCH: '1767225600'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '25.0.4.1+1'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Android NDK
+        run: sdkmanager 'ndk;28.2.13676358'
+      - name: Verify ABI and build both Android native architectures
+        run: python3 tools/build.py --profile '${{ matrix.profile }}'
+      - name: Run host JNI, failure-state, mapping and packaging contracts
+        run: python3 tools/test.py --profile '${{ matrix.profile }}'
+      - name: Parse Java AST and inventory diagnostic boundaries
+        run: |
+          mkdir -p build/ast
+          javac --release 17 -Xlint:all -Werror -d build/ast tools/JavaAstAudit.java
+          java -cp build/ast JavaAstAudit src/main/java
+          java -cp build/ast JavaAstAudit build/${{ matrix.profile }}/generated
+      - name: Verify reproducible JAR bytes
+        run: |
+          sha256sum dist/*.jar > build/before.sha256
+          python3 tools/build.py --profile '${{ matrix.profile }}'
+          sha256sum -c build/before.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: mgfsr3bridge-${{ matrix.profile }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14

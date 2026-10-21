@@ -1,0 +1,20 @@
+package com.googlebook.fsrbridge.mixin;
+
+import com.googlebook.fsrbridge.Fsr3Bridge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+/** Pinned synthetic suppliers: height is lambda 0; width is lambda 1. */
+@Mixin(targets = "@VIEWPORT_CLASS@", remap = false)
+public abstract class ViewportMixin {
+    @Inject(method = "lambda$addViewportUniforms$0()I", at = @At("RETURN"), cancellable = true, require = 1)
+    private static void mgfsr3$height(CallbackInfoReturnable<Integer> callback) {
+        callback.setReturnValue(Fsr3Bridge.uniformHeight(callback.getReturnValue()));
+    }
+    @Inject(method = "lambda$addViewportUniforms$1()I", at = @At("RETURN"), cancellable = true, require = 1)
+    private static void mgfsr3$width(CallbackInfoReturnable<Integer> callback) {
+        callback.setReturnValue(Fsr3Bridge.uniformWidth(callback.getReturnValue()));
+    }
+}

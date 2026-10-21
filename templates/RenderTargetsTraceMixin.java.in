@@ -1,0 +1,25 @@
+package com.googlebook.fsrbridge.mixin;
+
+import com.googlebook.fsrbridge.DiagnosticTrace;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+/** Records allocation, resize and the depth snapshots that precede hands and translucent geometry. */
+@Mixin(targets = "@TARGETS_CLASS@", remap = false)
+public abstract class RenderTargetsTraceMixin {
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
+    private void mgfsr3$allocation(CallbackInfo callback) { DiagnosticTrace.irisTargets(this, "ALLOCATION"); }
+    @Inject(method = "resizeIfNeeded@RESIZE_DESCRIPTOR@", at = @At("RETURN"), require = 1)
+    private void mgfsr3$resize(CallbackInfoReturnable<Boolean> callback) { DiagnosticTrace.irisTargets(this, "RESIZE"); }
+    @Inject(method = "copyPreHandDepth()V", at = @At("HEAD"), require = 1)
+    private void mgfsr3$beforeHandCopy(CallbackInfo callback) { DiagnosticTrace.copyEntry("PRE_HAND_COPY", this); }
+    @Inject(method = "copyPreHandDepth()V", at = @At("RETURN"), require = 1)
+    private void mgfsr3$afterHandCopy(CallbackInfo callback) { DiagnosticTrace.copyExit("PRE_HAND_COPY"); }
+    @Inject(method = "copyPreTranslucentDepth()V", at = @At("HEAD"), require = 1)
+    private void mgfsr3$beforeTranslucentCopy(CallbackInfo callback) { DiagnosticTrace.copyEntry("PRE_TRANSLUCENT_COPY", this); }
+    @Inject(method = "copyPreTranslucentDepth()V", at = @At("RETURN"), require = 1)
+    private void mgfsr3$afterTranslucentCopy(CallbackInfo callback) { DiagnosticTrace.copyExit("PRE_TRANSLUCENT_COPY"); }
+}

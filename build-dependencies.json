@@ -1,0 +1,26 @@
+{
+  "mixin": {
+    "url": "https://maven.fabricmc.net/net/fabricmc/sponge-mixin/0.16.4+mixin.0.8.7/sponge-mixin-0.16.4+mixin.0.8.7.jar",
+    "sha256": "921a2ca066d82d15d2939efd5eb22754e308db74b1e4277130a76625c3638dfd"
+  },
+  "fabric-loader": {
+    "url": "https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.19.3/fabric-loader-0.19.3.jar",
+    "sha256": "73eed8c34bbad0320a2a3cba5346351e822f74f82b3f3c060574068474132958"
+  },
+  "neoforge-loader": {
+    "url": "https://maven.neoforged.net/releases/net/neoforged/fancymodloader/loader/4.0.45/loader-4.0.45.jar",
+    "sha256": "8390398e67df23e72d85ed809685be2752c8ec545b7cbb6ad4b70fdc81e4dcd4"
+  },
+  "forge-javafml": {
+    "url": "https://maven.minecraftforge.net/net/minecraftforge/javafmllanguage/1.18.2-40.2.21/javafmllanguage-1.18.2-40.2.21.jar",
+    "sha256": "f00e9aebead532055b275c1612b4e9f2af0915faefce49bd97f0cf528888f8da"
+  },
+  "neoforge-api": {
+    "url": "https://maven.neoforged.net/releases/net/neoforged/mergetool/2.0.0/mergetool-2.0.0-api.jar",
+    "sha256": "0260881294d8b218afe3d673f084d3745a55c28b35205d07d5e62d7f22202a00"
+  },
+  "minecraft-26.2": {
+    "url": "https://piston-data.mojang.com/v1/objects/2dc72797acbc1b63fc16a11c4ac393605f453754/client.jar",
+    "sha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290"
+  }
+}

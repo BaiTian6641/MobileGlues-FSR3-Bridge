@@ -1,0 +1,37 @@
+package com.googlebook.fsrbridge.mixin;
+
+import com.googlebook.fsrbridge.AdapterProfile;
+import com.googlebook.fsrbridge.DiagnosticTrace;
+import com.googlebook.fsrbridge.Fsr3Bridge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Coerce;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+@PROGRAM_IMPORT@
+
+/** Keeps scene color and depth dimensions together at Iris' allocation and resize calls. */
+@Mixin(targets = "@PIPELINE_CLASS@", remap = false)
+public abstract class PipelineMixin {
+@ALLOCATION_HOOKS@
+    @Inject(method = "destroy()V", at = @At("HEAD"), require = 1)
+    private void mgfsr3$destroy(CallbackInfo callback) {
+        Fsr3Bridge.invalidateCamera();
+        Fsr3Bridge.destroySceneDepth();
+        Fsr3Bridge.resetFinalPassScope();
+        DiagnosticTrace.finish();
+    }
+
+    @Inject(method = "beginLevelRendering()V", at = @At("HEAD"), require = 1)
+    private void mgfsr3$beginFrame(CallbackInfo callback) {
+        Fsr3Bridge.resetFinalPassScope();
+        DiagnosticTrace.beginFrame("LEVEL");
+    }
+
+    @Inject(method = "beginLevelRendering()V", at = @At("RETURN"), require = 1)
+    private void mgfsr3$clearDepth(CallbackInfo callback) {
+        Fsr3Bridge.clearSceneDepth();
+    }
+}

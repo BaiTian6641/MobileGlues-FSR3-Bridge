@@ -1,0 +1,43 @@
+package com.googlebook.fsrbridge.mixin;
+
+import com.googlebook.fsrbridge.DiagnosticTrace;
+import com.googlebook.fsrbridge.Fsr3Bridge;
+import com.googlebook.fsrbridge.NativeBridge;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/** Executes the bridge after the pinned Iris final pass, before vanilla HUD composition. */
+@Mixin(targets = "@FINAL_CLASS@", remap = false)
+public abstract class FinalPassMixin {
+    @Unique private boolean mgfsr3$entered;
+
+    @Inject(method = "renderFinalPass()V", at = @At("HEAD"), require = 1)
+    private void mgfsr3$begin(CallbackInfo callback) {
+        mgfsr3$entered = Fsr3Bridge.available();
+        if (!mgfsr3$entered) return;
+        DiagnosticTrace.startRole("FINAL_DRAW", true);
+        Fsr3Bridge.beginFinalPass();
+        NativeBridge.finalScope(true);
+        NativeBridge.setSceneDepth(Fsr3Bridge.sceneDepthTextureId());
+        Fsr3Bridge.captureCamera();
+        Fsr3Bridge.resetNativeViewport();
+    }
+
+    @Inject(method = "renderFinalPass()V", at = @At("RETURN"), require = 1)
+    private void mgfsr3$end(CallbackInfo callback) {
+        // Unwind an entered scope even if availability changes during the pass.
+        if (!mgfsr3$entered) return;
+        try {
+            DiagnosticTrace.endRole("FINAL_DRAW_RETURN", null);
+            Fsr3Bridge.submit();
+        } finally {
+            NativeBridge.finalScope(false);
+            NativeBridge.setSceneDepth(0);
+            Fsr3Bridge.endFinalPass();
+            mgfsr3$entered = false;
+        }
+    }
+}
