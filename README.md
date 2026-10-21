@@ -12,7 +12,7 @@ shader mod below. The MobileGlues renderer plugin remains a separate APK.
 | 26.2 | Fabric | Iris 1.11.4 (`gxZWWnKH`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
 | 26.2 | NeoForge | Iris 1.11.4 (`k55HdONq`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
 | 1.21.1 | Fabric | Iris 1.8.14-beta.1 (`bAo1Qhte`) | Iris `DepthTexture` | Build, bytecode verification, host contracts |
-| 1.21.1 | NeoForge | Iris 1.8.14-beta.1 (`KduFYu4t`) | Iris `DepthTexture` | Build, bytecode verification, host contracts |
+| 1.21.1 | NeoForge | Iris 1.8.14-beta.1 (`KduFYu4t`) | Iris `DepthTexture` | Build/host checks; one X1E loader, all seven mixins, world and save/quit smoke |
 | 1.20.1 | Fabric | Iris 1.7.6 (`s5eFLITc`) | Iris `DepthTexture` | Build, bytecode verification, host contracts |
 | 1.20.1 | Forge | Oculus 1.8.0 (`iQ1SwGc3`) | Iris `DepthTexture` | Build, bytecode verification, host contracts |
 | 1.18.2 | Fabric | Iris 1.6.11 (`ogIRhnAJ`) | Legacy three-argument `DepthTexture` | Build, bytecode verification, host contracts |
@@ -20,10 +20,20 @@ shader mod below. The MobileGlues renderer plugin remains a separate APK.
 
 All eight implement scene color/depth scaling, final-pass reconstruction, viewport
 uniforms, camera capture and lifecycle cleanup. These are **development artifacts**.
-No loader launch, Minecraft world render, physical X1E/X2E run, visual-fidelity gate,
-thermal/performance gate, or lifecycle qualification has been performed for this
-standalone revision. The older in-tree 1.21.1 NeoForge bridge has separate device
-history; it does not qualify the changed JARs here. See [validation](docs/validation.md).
+On 2026-10-21, the hosted 1.21.1 NeoForge JAR from commit
+`287fff5e6e72c6cf94b082f13f81cb7250d012ec` passed one physical X1E smoke test:
+the loader recognized version 0.2.0, all seven bridge mixins applied, a world
+rendered the unchanged Complementary Reimagined r5.9.3 LOW selection, and save/quit
+saved all chunks and dimensions. The tested JAR SHA-256 is
+`db37b5f138f8271cf5fc90735a724a365b0f72d0a045350212eae2433439842b`.
+
+The other seven profiles have no loader/game runtime evidence. This smoke test
+captured no native-submit trace or quantitative FSR scaling/quality result.
+NativeAA and scaled presets, temporal fidelity, thermal/performance behavior and
+repeated lifecycle recovery remain unqualified; X2E is untested. See
+[validation](docs/validation.md) for the exact device, renderer, evidence and
+remaining gates. Historical hashes identify the tested bytes; rebuilding after
+these documentation edits intentionally changes the embedded source fingerprint.
 
 Minecraft 26.2 has an experimental Vulkan backend. This bridge requires a current
 OpenGL context and a real `GlTexture`; it does not translate Vulkan or support
