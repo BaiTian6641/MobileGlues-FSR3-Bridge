@@ -13,22 +13,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare:
+    name: Prepare profile matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      profiles: ${{ steps.matrix.outputs.profiles }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - id: matrix
+        shell: bash
+        run: |
+          echo "profiles=$(python3 -c 'import json; print(json.dumps([p[\"id\"] for p in json.load(open(\"compatibility-lock.json\"))[\"profiles\"]]))')" >> "$GITHUB_OUTPUT"
   jars:
     name: ${{ matrix.profile }}
+    needs: prepare
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        profile:
-          - 26.2-fabric
-          - 26.2-neoforge
-          - 1.21.1-fabric
-          - 1.21.1-neoforge
-          - 1.20.1-fabric
-          - 1.20.1-forge
-          - 1.18.2-fabric
-          - 1.18.2-forge
+        profile: ${{ fromJSON(needs.prepare.outputs.profiles) }}
     env:
       ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/28.2.13676358
       SOURCE_DATE_EPOCH: '1767225600'

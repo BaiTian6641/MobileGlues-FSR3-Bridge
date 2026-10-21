@@ -91,7 +91,7 @@ public final class SubmissionTargetTest {
         target.close();
         target.close();
         restored(31, 37);
-        if (!AdapterProfile.value("minecraft").equals("26.2")) {
+        if (!AdapterProfile.usesGpuTextureDepth()) {
             AdapterProfile.bindSubmissionTarget(null).close();
             restored(31, 37);
         }

@@ -45,7 +45,7 @@ def check_diagnostics(profile, javac, java, folder, artifact):
         assert all(e['gl'] is None for e in submissions)
         outcomes = [e['iris'] for e in submissions]
         first = outcomes[0]
-        if profile['minecraft'] == '26.2':
+        if profile['depth_resource'] == 'gpu_texture':
             assert not first['attempted'] and first['native_rc'] is None and first['stage'] == 'target_bind'
         else:
             assert first['attempted'] and first['native_rc'] == -23 and first['stage'] == 'complete'
@@ -57,7 +57,7 @@ def check_diagnostics(profile, javac, java, folder, artifact):
         restore = next(e for e in outcomes if e['stage'] == 'target_restore')
         assert restore['attempted'] and restore['native_rc'] == 0 and restore['exception_class']
         assert any(e['stage'] == 'unavailable' and not e['depth_convention_negotiated'] for e in outcomes)
-        assert all(e['sampled_depth_reversed'] == (profile['minecraft'] == '26.2') for e in outcomes)
+        assert all(e['sampled_depth_reversed'] == (profile['depth_convention'] == 1) for e in outcomes)
         assert 'private/path' not in json.dumps(rows)
         print('PASS parsed diagnostic JSON, terrain roles, submission outcomes and', mode, 'budget:', profile['id'])
     for field, value in [('set_phase_code_sha256', '0' * 64), ('phase_constants', ['NONE'])]:

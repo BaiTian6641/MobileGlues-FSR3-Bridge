@@ -22,5 +22,9 @@
   "minecraft-26.2": {
     "url": "https://piston-data.mojang.com/v1/objects/2dc72797acbc1b63fc16a11c4ac393605f453754/client.jar",
     "sha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290"
+  },
+  "minecraft-26.1": {
+    "url": "https://piston-data.mojang.com/v1/objects/191771837687b766537a8c4607cb6fad79c533a1/client.jar",
+    "sha256": "bc6194c61566b587f196090d730698f2191170f7580adb143e4ff839939d3840"
   }
 }

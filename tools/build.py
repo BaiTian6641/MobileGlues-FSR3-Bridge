@@ -242,7 +242,7 @@ def resources(profile, classes):
                   'CustomUniformsMixin', 'CustomUniformDefinitionAccessor'],
               'injectors': {'defaultRequire': 1}}
     (classes / 'mixins.mgfsrbridge.json').write_text(json.dumps(mixins, indent=2) + '\n')
-    props = {key: profile[key] for key in ['id', 'minecraft', 'namespace', 'scene_scaling', 'matrix_store', 'camera_fields', 'depth_convention']}
+    props = {key: profile[key] for key in ['id', 'minecraft', 'namespace', 'scene_scaling', 'matrix_store', 'camera_fields', 'depth_convention', 'depth_resource']}
     props.update(profile['classes'])
     (classes / 'adapter.properties').write_text(''.join(f'{key}={str(value).lower() if isinstance(value, bool) else value}\n' for key, value in sorted(props.items())))
     (classes / 'META-INF').mkdir(exist_ok=True)
@@ -308,28 +308,31 @@ def package(profile, classes):
 def build(profile, dependencies):
     artifact = fetch(profile['id'], profile)
     evidence = verify_hooks(profile, artifact)
-    if profile['minecraft'] == '26.2':
-        with zipfile.ZipFile(dependencies['minecraft-26.2']) as game:
+    game_jar = profile.get('game_jar', 'minecraft-' + profile['minecraft'])
+    if profile['depth_resource'] == 'gpu_texture':
+        with zipfile.ZipFile(dependencies[game_jar]) as game:
             _, game_renderer, _ = methods(game.read('net/minecraft/client/renderer/GameRenderer.class'))
             contract = profile['depth_contract']
             code = next(attrs['Code'] for name, desc, _, attrs in game_renderer
                         if name == 'render' and desc == contract['game_render_descriptor'])
-            if sha(code) != contract['game_render_code_sha256'] or code[8 + 96] != 14:
-                raise ValueError('26.2 main depth clear-zero bytecode drift')
+            clear_offset = contract.get('clear_instruction_offset', 96)
+            clear_value = contract.get('clear_instruction_value', 14)
+            if sha(code) != contract['game_render_code_sha256'] or code[8 + clear_offset] != clear_value:
+                raise ValueError(profile['minecraft'] + ' main depth clear-zero bytecode drift')
             evidence.append('GameRenderer.render:verified-main-depth-clear-zero-bytecode')
             for owner, expected in profile['game_api'].items():
                 _, declared, _ = methods(game.read(owner + '.class'))
                 actual = {(name, desc) for name, desc, _, _ in declared}
                 for name, desc in expected.items():
                     if (name, desc) not in actual:
-                        raise ValueError('Minecraft 26.2 GPU API drift: ' + owner + '.' + name)
+                        raise ValueError('Minecraft ' + profile['minecraft'] + ' GPU API drift: ' + owner + '.' + name)
                     evidence.append(owner + '.' + name + desc)
             for owner, expected in profile['game_fields'].items():
                 _, _, _, fields = methods(game.read(owner + '.class'), include_fields=True)
                 actual = {(name, desc) for name, desc, access, _ in fields if access & 0x1}
                 for name, desc in expected.items():
                     if (name, desc) not in actual:
-                        raise ValueError('Minecraft 26.2 GPU field drift: ' + owner + '.' + name)
+                        raise ValueError('Minecraft ' + profile['minecraft'] + ' GPU field drift: ' + owner + '.' + name)
                     evidence.append(owner + '.' + name + ':' + desc)
     folder = ROOT / 'build' / profile['id']
     if folder.exists():
@@ -341,7 +344,7 @@ def build(profile, dependencies):
     if profile['loader'] == 'neoforge':
         classpath.append(dependencies['neoforge-api'])
     if profile['depth_resource'] == 'gpu_texture':
-        classpath.append(dependencies['minecraft-26.2'])
+        classpath.append(dependencies[game_jar])
     if profile['scene_scaling']:
         # Use actual class bytes without Oculus's stale manifest Class-Path. Only
         # compile-time API dependencies are copied; none enter the adapter JAR.

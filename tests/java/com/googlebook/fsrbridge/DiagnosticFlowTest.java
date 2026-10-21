@@ -66,7 +66,7 @@ public final class DiagnosticFlowTest {
         control(-23, false, false);
         phase("NONE"); // Optional failure did not escape or prevent next boundary.
 
-        boolean modern = AdapterProfile.value("minecraft").equals("26.2");
+        boolean modern = AdapterProfile.usesGpuTextureDepth();
         Fsr3Bridge.submit(null);
         check(calls(false) == (modern ? 0 : 1), "target rejection is not a native attempt");
         if (!modern) {

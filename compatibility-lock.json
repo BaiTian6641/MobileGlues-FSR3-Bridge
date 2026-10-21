@@ -2,6 +2,554 @@
   "schema": 1,
   "profiles": [
     {
+      "id": "26.1-neoforge",
+      "minecraft": "26.1",
+      "loader": "neoforge",
+      "shader_version": "1.11.4+26.1-neoforge",
+      "shader_mod": "iris",
+      "artifact_id": "qE5Y7GrZ",
+      "url": "https://cdn.modrinth.com/data/YL57xq9U/versions/qE5Y7GrZ/iris-neoforge-1.11.4%2Bmc26.1.2.jar",
+      "sha256": "32d672a890d3c74f75227abc7e7ef048bbb83a799bf46632f03f0583d4c22be5",
+      "sha512": "751cc32fbc319e2549759aa8ed2c798fa8e3a7a32924a27f6f80f81aa2634a5d9d726828348b271d70449c6d25d1fee352cec932185aa066da109414f0a7678f",
+      "dependencies": [
+        {
+          "version_id": "DmnNKsfS",
+          "project_id": "AANobbMI",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "classes": {
+        "FinalPassRenderer": "net.irisshaders.iris.pipeline.FinalPassRenderer",
+        "RenderTargets": "net.irisshaders.iris.targets.RenderTargets",
+        "ViewportUniforms": "net.irisshaders.iris.uniforms.ViewportUniforms",
+        "DepthTexture": "net.irisshaders.iris.targets.DepthTexture",
+        "ProgramSet": "net.irisshaders.iris.shaderpack.programs.ProgramSet",
+        "ProgramId": "net.irisshaders.iris.shaderpack.loading.ProgramId",
+        "CapturedRenderingState": "net.irisshaders.iris.uniforms.CapturedRenderingState",
+        "CameraUniforms": "net.irisshaders.iris.uniforms.CameraUniforms",
+        "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
+        "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
+        "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
+      },
+      "namespace": "net.irisshaders.iris",
+      "scene_scaling": true,
+      "java": 25,
+      "mod_version": "1.11.4+mc26.1.2",
+      "methods": {
+        "Pipeline": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/shaderpack/programs/ProgramSet;)V"
+          ],
+          "destroy": [
+            "()V"
+          ],
+          "beginLevelRendering": [
+            "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
+          ]
+        },
+        "FinalPassRenderer": {
+          "renderFinalPass": [
+            "()V"
+          ]
+        },
+        "RenderTargets": {
+          "<init>": [
+            "(IILcom/mojang/blaze3d/textures/GpuTexture;ILnet/irisshaders/iris/gl/texture/DepthBufferFormat;Ljava/util/Map;Lnet/irisshaders/iris/shaderpack/properties/PackDirectives;)V"
+          ],
+          "resizeIfNeeded": [
+            "(ILcom/mojang/blaze3d/textures/GpuTexture;IILnet/irisshaders/iris/gl/texture/DepthBufferFormat;Lnet/irisshaders/iris/shaderpack/properties/PackDirectives;)Z"
+          ],
+          "copyPreHandDepth": [
+            "()V"
+          ],
+          "copyPreTranslucentDepth": [
+            "()V"
+          ]
+        },
+        "ViewportUniforms": {
+          "lambda$addViewportUniforms$0": [
+            "()I"
+          ],
+          "lambda$addViewportUniforms$1": [
+            "()I"
+          ]
+        },
+        "DepthTexture": {
+          "<init>": [
+            "(Ljava/lang/String;IILnet/irisshaders/iris/gl/texture/DepthBufferFormat;)V"
+          ],
+          "getTextureId": [
+            "()I"
+          ]
+        },
+        "ProgramSet": {
+          "get": [
+            "(Lnet/irisshaders/iris/shaderpack/loading/ProgramId;)Ljava/util/Optional;"
+          ]
+        },
+        "CapturedRenderingState": {
+          "getGbufferModelView": [
+            "()Lorg/joml/Matrix4fc;"
+          ],
+          "getGbufferProjection": [
+            "()Lorg/joml/Matrix4fc;"
+          ]
+        },
+        "CameraUniforms": {
+          "getUnshiftedCameraPosition": [
+            "()Lorg/joml/Vector3d;"
+          ]
+        },
+        "HandRenderer": {
+          "renderSolid": [
+            "(Lorg/joml/Matrix4fc;FLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/GameRenderer;Lnet/irisshaders/iris/pipeline/WorldRenderingPipeline;)V"
+          ],
+          "renderTranslucent": [
+            "(Lorg/joml/Matrix4fc;FLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/GameRenderer;Lnet/irisshaders/iris/pipeline/WorldRenderingPipeline;)V"
+          ]
+        },
+        "ShadowRenderer": {
+          "renderShadows": [
+            "(Lnet/irisshaders/iris/mixin/LevelRendererAccessor;Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V"
+          ]
+        },
+        "CompositeRenderer": {
+          "renderAll": [
+            "()V"
+          ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
+        }
+      },
+      "matrix_store": "m_27650_",
+      "camera_fields": "x,y,z",
+      "depth_resource": "gpu_texture",
+      "game_api": {
+        "com/mojang/blaze3d/textures/GpuTexture": {
+          "getFormat": "()Lcom/mojang/blaze3d/textures/TextureFormat;",
+          "usage": "()I",
+          "close": "()V",
+          "getWidth": "(I)I",
+          "getHeight": "(I)I",
+          "isClosed": "()Z"
+        },
+        "com/mojang/blaze3d/opengl/GlTexture": {
+          "glId": "()I"
+        },
+        "com/mojang/blaze3d/systems/RenderSystem": {
+          "getDevice": "()Lcom/mojang/blaze3d/systems/GpuDevice;"
+        },
+        "com/mojang/blaze3d/systems/GpuDevice": {
+          "createTexture": "(Ljava/lang/String;ILcom/mojang/blaze3d/textures/TextureFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"
+        },
+        "net/minecraft/client/Minecraft": {
+          "getInstance": "()Lnet/minecraft/client/Minecraft;",
+          "getMainRenderTarget": "()Lcom/mojang/blaze3d/pipeline/RenderTarget;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "getColorTexture": "()Lcom/mojang/blaze3d/textures/GpuTexture;"
+        }
+      },
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      },
+      "game_fields": {
+        "net/minecraft/client/Minecraft": {
+          "gameRenderer": "Lnet/minecraft/client/renderer/GameRenderer;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "width": "I",
+          "height": "I"
+        }
+      },
+      "depth_convention": 1,
+      "depth_contract": {
+        "resize_code_sha256": "136cc15da73f1f0723e3eee661bfb025194b4ac5c43f27d02219d5a3f90dbb54",
+        "game_render_descriptor": "(Lnet/minecraft/client/DeltaTracker;Z)V",
+        "game_render_code_sha256": "9d7e384b386d91883b34e39f8adc7a305bf626acb42d8f2fd28adda9eed68182",
+        "snapshot_fields": {
+          "noHand": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "clear_instruction_value": 54
+      },
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "2117e982df4f8e9a9ffc7aae4b936d1b59cd823693d2cb18ef0693fc15b301fd",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      },
+      "game_jar": "minecraft-26.1"
+    },
+    {
+      "id": "26.1-fabric",
+      "minecraft": "26.1",
+      "loader": "fabric",
+      "shader_version": "1.11.4+26.1-fabric",
+      "shader_mod": "iris",
+      "artifact_id": "sZbVsl2Q",
+      "url": "https://cdn.modrinth.com/data/YL57xq9U/versions/sZbVsl2Q/iris-fabric-1.11.4%2Bmc26.1.2.jar",
+      "sha256": "69bdb6899ba006cf91b16565e4445a7a4f331e39b790c81c99626814bf6e22df",
+      "sha512": "d99b309d282edb1266dfbdfeda792beba1f808334489604818d6b298c328393dcd7eb5b28a56cea14c9cf8e4eb9c088cb2e80b228b3427a836d154a368b1bcb9",
+      "dependencies": [
+        {
+          "version_id": "xJZxADzI",
+          "project_id": "AANobbMI",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ],
+      "classes": {
+        "FinalPassRenderer": "net.irisshaders.iris.pipeline.FinalPassRenderer",
+        "RenderTargets": "net.irisshaders.iris.targets.RenderTargets",
+        "ViewportUniforms": "net.irisshaders.iris.uniforms.ViewportUniforms",
+        "DepthTexture": "net.irisshaders.iris.targets.DepthTexture",
+        "ProgramSet": "net.irisshaders.iris.shaderpack.programs.ProgramSet",
+        "ProgramId": "net.irisshaders.iris.shaderpack.loading.ProgramId",
+        "CapturedRenderingState": "net.irisshaders.iris.uniforms.CapturedRenderingState",
+        "CameraUniforms": "net.irisshaders.iris.uniforms.CameraUniforms",
+        "HandRenderer": "net.irisshaders.iris.pathways.HandRenderer",
+        "ShadowRenderer": "net.irisshaders.iris.shadows.ShadowRenderer",
+        "CompositeRenderer": "net.irisshaders.iris.pipeline.CompositeRenderer",
+        "Pipeline": "net.irisshaders.iris.pipeline.IrisRenderingPipeline",
+        "CustomUniforms": "net.irisshaders.iris.uniforms.custom.CustomUniforms",
+        "CustomUniformInputs": "net.irisshaders.iris.uniforms.custom.CustomUniformFixedInputUniformsHolder",
+        "CustomUniformDefinition": "net.irisshaders.iris.uniforms.custom.CustomUniforms$Builder$Variable",
+        "CachedUniform": "net.irisshaders.iris.uniforms.custom.cached.CachedUniform",
+        "ExpressionFunctionCall": "kroppeb.stareval.element.tree.FunctionCall",
+        "ExpressionBinary": "kroppeb.stareval.element.tree.BinaryExpressionElement",
+        "ExpressionUnary": "kroppeb.stareval.element.tree.UnaryExpressionElement",
+        "ExpressionAccess": "kroppeb.stareval.element.tree.AccessExpressionElement",
+        "GlFramebuffer": "net.irisshaders.iris.gl.framebuffer.GlFramebuffer",
+        "GlResource": "net.irisshaders.iris.gl.GlResource",
+        "WorldRenderingPhase": "net.irisshaders.iris.pipeline.WorldRenderingPhase"
+      },
+      "namespace": "net.irisshaders.iris",
+      "scene_scaling": true,
+      "java": 25,
+      "mod_version": "1.11.4+mc26.1.2",
+      "methods": {
+        "Pipeline": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/shaderpack/programs/ProgramSet;)V"
+          ],
+          "destroy": [
+            "()V"
+          ],
+          "beginLevelRendering": [
+            "()V"
+          ],
+          "setPhase": [
+            "(Lnet/irisshaders/iris/pipeline/WorldRenderingPhase;)V"
+          ]
+        },
+        "FinalPassRenderer": {
+          "renderFinalPass": [
+            "()V"
+          ]
+        },
+        "RenderTargets": {
+          "<init>": [
+            "(IILcom/mojang/blaze3d/textures/GpuTexture;ILnet/irisshaders/iris/gl/texture/DepthBufferFormat;Ljava/util/Map;Lnet/irisshaders/iris/shaderpack/properties/PackDirectives;)V"
+          ],
+          "resizeIfNeeded": [
+            "(ILcom/mojang/blaze3d/textures/GpuTexture;IILnet/irisshaders/iris/gl/texture/DepthBufferFormat;Lnet/irisshaders/iris/shaderpack/properties/PackDirectives;)Z"
+          ],
+          "copyPreHandDepth": [
+            "()V"
+          ],
+          "copyPreTranslucentDepth": [
+            "()V"
+          ]
+        },
+        "ViewportUniforms": {
+          "lambda$addViewportUniforms$0": [
+            "()I"
+          ],
+          "lambda$addViewportUniforms$1": [
+            "()I"
+          ]
+        },
+        "DepthTexture": {
+          "<init>": [
+            "(Ljava/lang/String;IILnet/irisshaders/iris/gl/texture/DepthBufferFormat;)V"
+          ],
+          "getTextureId": [
+            "()I"
+          ]
+        },
+        "ProgramSet": {
+          "get": [
+            "(Lnet/irisshaders/iris/shaderpack/loading/ProgramId;)Ljava/util/Optional;"
+          ]
+        },
+        "CapturedRenderingState": {
+          "getGbufferModelView": [
+            "()Lorg/joml/Matrix4fc;"
+          ],
+          "getGbufferProjection": [
+            "()Lorg/joml/Matrix4fc;"
+          ]
+        },
+        "CameraUniforms": {
+          "getUnshiftedCameraPosition": [
+            "()Lorg/joml/Vector3d;"
+          ]
+        },
+        "HandRenderer": {
+          "renderSolid": [
+            "(Lorg/joml/Matrix4fc;FLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/GameRenderer;Lnet/irisshaders/iris/pipeline/WorldRenderingPipeline;)V"
+          ],
+          "renderTranslucent": [
+            "(Lorg/joml/Matrix4fc;FLnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/GameRenderer;Lnet/irisshaders/iris/pipeline/WorldRenderingPipeline;)V"
+          ]
+        },
+        "ShadowRenderer": {
+          "renderShadows": [
+            "(Lnet/irisshaders/iris/mixin/LevelRendererAccessor;Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V"
+          ]
+        },
+        "CompositeRenderer": {
+          "renderAll": [
+            "()V"
+          ]
+        },
+        "CustomUniforms": {
+          "<init>": [
+            "(Lnet/irisshaders/iris/uniforms/custom/CustomUniformFixedInputUniformsHolder;Ljava/util/Map;)V"
+          ],
+          "optimise": [
+            "()V"
+          ]
+        },
+        "CachedUniform": {
+          "getName": [
+            "()Ljava/lang/String;"
+          ],
+          "update": [
+            "()V"
+          ]
+        },
+        "GlFramebuffer": {
+          "getId": [
+            "()I"
+          ]
+        }
+      },
+      "matrix_store": "method_4932",
+      "camera_fields": "x,y,z",
+      "depth_resource": "gpu_texture",
+      "game_api": {
+        "com/mojang/blaze3d/textures/GpuTexture": {
+          "getFormat": "()Lcom/mojang/blaze3d/textures/TextureFormat;",
+          "usage": "()I",
+          "close": "()V",
+          "getWidth": "(I)I",
+          "getHeight": "(I)I",
+          "isClosed": "()Z"
+        },
+        "com/mojang/blaze3d/opengl/GlTexture": {
+          "glId": "()I"
+        },
+        "com/mojang/blaze3d/systems/RenderSystem": {
+          "getDevice": "()Lcom/mojang/blaze3d/systems/GpuDevice;"
+        },
+        "com/mojang/blaze3d/systems/GpuDevice": {
+          "createTexture": "(Ljava/lang/String;ILcom/mojang/blaze3d/textures/TextureFormat;IIII)Lcom/mojang/blaze3d/textures/GpuTexture;"
+        },
+        "net/minecraft/client/Minecraft": {
+          "getInstance": "()Lnet/minecraft/client/Minecraft;",
+          "getMainRenderTarget": "()Lcom/mojang/blaze3d/pipeline/RenderTarget;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "getColorTexture": "()Lcom/mojang/blaze3d/textures/GpuTexture;"
+        }
+      },
+      "viewport_fields": {
+        "FinalPassRenderer": {
+          "customUniforms": "Lnet/irisshaders/iris/uniforms/custom/CustomUniforms;",
+          "colorHolder": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "CustomUniforms": {
+          "uniformOrder": "Ljava/util/List;",
+          "dependsOn": "Ljava/util/Map;"
+        },
+        "CustomUniformDefinition": {
+          "expression": "Lkroppeb/stareval/element/ExpressionElement;"
+        }
+      },
+      "viewport_ast_accessors": {
+        "id": "id",
+        "args": "args",
+        "left": "left",
+        "right": "right",
+        "inner": "inner",
+        "base": "base"
+      },
+      "viewport_expression_methods": {
+        "ExpressionFunctionCall": {
+          "id": "()Ljava/lang/String;",
+          "args": "()Ljava/util/List;"
+        },
+        "ExpressionBinary": {
+          "left": "()Lkroppeb/stareval/element/ExpressionElement;",
+          "right": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionUnary": {
+          "inner": "()Lkroppeb/stareval/element/ExpressionElement;"
+        },
+        "ExpressionAccess": {
+          "base": "()Lkroppeb/stareval/element/AccessibleExpressionElement;"
+        }
+      },
+      "game_fields": {
+        "net/minecraft/client/Minecraft": {
+          "gameRenderer": "Lnet/minecraft/client/renderer/GameRenderer;"
+        },
+        "com/mojang/blaze3d/pipeline/RenderTarget": {
+          "width": "I",
+          "height": "I"
+        }
+      },
+      "depth_convention": 1,
+      "depth_contract": {
+        "resize_code_sha256": "136cc15da73f1f0723e3eee661bfb025194b4ac5c43f27d02219d5a3f90dbb54",
+        "game_render_descriptor": "(Lnet/minecraft/client/DeltaTracker;Z)V",
+        "game_render_code_sha256": "9d7e384b386d91883b34e39f8adc7a305bf626acb42d8f2fd28adda9eed68182",
+        "snapshot_fields": {
+          "noHand": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
+          "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
+          "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
+        },
+        "clear_instruction_value": 54
+      },
+      "diagnostic_contract": {
+        "set_phase_code_sha256": "2117e982df4f8e9a9ffc7aae4b936d1b59cd823693d2cb18ef0693fc15b301fd",
+        "phase_constants": [
+          "NONE",
+          "SKY",
+          "SUNSET",
+          "CUSTOM_SKY",
+          "SUN",
+          "MOON",
+          "STARS",
+          "VOID",
+          "TERRAIN_SOLID",
+          "TERRAIN_CUTOUT_MIPPED",
+          "TERRAIN_CUTOUT",
+          "ENTITIES",
+          "BLOCK_ENTITIES",
+          "DESTROY",
+          "OUTLINE",
+          "DEBUG",
+          "HAND_SOLID",
+          "TERRAIN_TRANSLUCENT",
+          "TRIPWIRE",
+          "PARTICLES",
+          "CLOUDS",
+          "RAIN_SNOW",
+          "WORLD_BORDER",
+          "HAND_TRANSLUCENT"
+        ]
+      },
+      "game_jar": "minecraft-26.1"
+    },
+    {
       "id": "26.2-fabric",
       "minecraft": "26.2",
       "loader": "fabric",
@@ -243,7 +791,8 @@
           "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
           "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
           "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
-        }
+        },
+        "clear_instruction_value": 14
       },
       "diagnostic_contract": {
         "set_phase_code_sha256": "d4d20bb68594a1900f6f774493fa5d874abcdb2a941de442dd731a9b4292fefa",
@@ -517,7 +1066,8 @@
           "noTranslucents": "Lcom/mojang/blaze3d/textures/GpuTexture;",
           "noHandDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;",
           "noTranslucentsDestFb": "Lnet/irisshaders/iris/gl/framebuffer/GlFramebuffer;"
-        }
+        },
+        "clear_instruction_value": 14
       },
       "diagnostic_contract": {
         "set_phase_code_sha256": "d4d20bb68594a1900f6f774493fa5d874abcdb2a941de442dd731a9b4292fefa",

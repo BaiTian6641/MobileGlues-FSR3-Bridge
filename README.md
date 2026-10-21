@@ -9,6 +9,8 @@ shader mod below. The MobileGlues renderer plugin remains a separate APK.
 
 | Minecraft | Loader | Pinned shader mod | Depth adapter | Current evidence |
 | --- | --- | --- | --- | --- |
+| 26.1 | Fabric | Iris 1.11.4 (`sZbVsl2Q`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
+| 26.1 | NeoForge | Iris 1.11.4 (`qE5Y7GrZ`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
 | 26.2 | Fabric | Iris 1.11.4 (`gxZWWnKH`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
 | 26.2 | NeoForge | Iris 1.11.4 (`k55HdONq`) | Mojang `GpuTexture`, OpenGL only | Build, bytecode/API verification, host contracts |
 | 1.21.1 | Fabric | Iris 1.8.14-beta.1 (`bAo1Qhte`) | Iris `DepthTexture` | Build, bytecode verification, host contracts |
@@ -18,7 +20,7 @@ shader mod below. The MobileGlues renderer plugin remains a separate APK.
 | 1.18.2 | Fabric | Iris 1.6.11 (`ogIRhnAJ`) | Legacy three-argument `DepthTexture` | Build, bytecode verification, host contracts |
 | 1.18.2 | Forge | Oculus 1.6.4 (`UynWw2df`) | Legacy three-argument `DepthTexture` | Build, bytecode verification, host contracts |
 
-All eight implement scene color/depth scaling, final-pass reconstruction, viewport
+All ten implement scene color/depth scaling, final-pass reconstruction, viewport
 uniforms, camera capture and lifecycle cleanup. These are **development artifacts**.
 On 2026-10-21, the hosted 1.21.1 NeoForge JAR from commit
 `287fff5e6e72c6cf94b082f13f81cb7250d012ec` passed one physical X1E smoke test:
@@ -30,7 +32,7 @@ saved all chunks and dimensions. The tested JAR SHA-256 is
 This historical smoke test captured no native-submit trace or quantitative FSR
 scaling/quality result. Subsequent 0.2.0 tests on Forge 1.20.1 and NeoForge 26.2
 found packaging and scaling regressions; see [the regression investigation](docs/scaling-regressions.md).
-The remaining five profiles still have no loader/game runtime evidence.
+The remaining profiles still have no loader/game runtime evidence beyond the 1.21.1 NeoForge smoke.
 NativeAA and scaled presets, temporal fidelity, thermal/performance behavior and
 repeated lifecycle recovery remain unqualified; X2E is untested. See
 [validation](docs/validation.md) for the exact device, renderer, evidence and
@@ -65,8 +67,11 @@ records returned JNI status separately from target setup and cleanup failures.
 See [diagnostic capture](docs/diagnostic-capture.md) for fields, capture limits and
 host-test boundaries. This diagnostic change does not establish a terrain fix.
 
-Version 0.2.4 corrects depth ownership during quality changes in the six older
-adapters. It refreshes Iris/Oculus attachments when the selected depth changes,
+Version 0.2.4 adds capability-gated GPU-texture handling: 26.1, 26.2 and future
+26.x profiles select the Mojang `GpuTexture` path from `depth_resource`, not an
+exact version string, and the main-target accessor covers both the 26.2
+`GameRenderer` and 26.1/future `Minecraft.getMainRenderTarget` forms. It also
+corrects depth ownership during quality changes in the six older adapters. It refreshes Iris/Oculus attachments when the selected depth changes,
 retains replaced textures until adoption completes, and stops submitting scaled
 depth after a switch to Native AA. All six pass 86 focused host checks each;
 the preserved 0.2.3 JARs fail both targeted regression witnesses per profile.
