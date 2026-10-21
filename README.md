@@ -59,6 +59,12 @@ depth-copy attachments. It also fixes numeric texture IDs in diagnostic JSON and
 reports a missing diagnostic API once. See [depth conventions and ownership](docs/depth-lifecycle.md)
 for the exact contracts, host evidence and remaining device checks.
 
+Version 0.2.3 adds bounded terrain-phase and post-submission result events. It
+connects the previously unused phase recorder to pinned Iris/Oculus methods and
+records returned JNI status separately from target setup and cleanup failures.
+See [diagnostic capture](docs/diagnostic-capture.md) for fields, capture limits and
+host-test boundaries. This diagnostic change does not establish a terrain fix.
+
 ## Build
 
 Install Python 3.12+, JDK 25, and Android NDK **28.2.13676358 (r28c)**. JDK 25 is
@@ -74,7 +80,7 @@ python3 tools/test.py --profile all
 
 To build one lane, for example, use `sh build.sh --profile 1.21.1-neoforge`.
 `JAVAC=/path/to/jdk25/bin/javac` selects a compiler explicitly. Build outputs are
-`dist/mgfsr3bridge-0.2.2-<minecraft>-<loader>.jar`, with per-profile JSON reports.
+`dist/mgfsr3bridge-0.2.3-<minecraft>-<loader>.jar`, with per-profile JSON reports.
 Every JAR includes Android `arm64-v8a` and `x86_64` helpers with 16 KB-aligned ELF
 segments. x86_64 is an ABI build lane and does not establish target-device support.
 
